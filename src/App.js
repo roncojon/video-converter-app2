@@ -94,7 +94,7 @@ function App() {
                 </div>
 
                 {output && (
-                  <div className="alert alert-info mt-4">
+                  <div className="alert alert-info mt-4 overflow-auto">
                     <span className="text-sm">{output}</span>
                   </div>
                 )}
