@@ -21,12 +21,23 @@ function App() {
     }
   };
 
+  const handleConvertToHLS = async () => {
+    if (!filePath) return;
+  
+    try {
+      const result = await window.electronAPI.runFFmpeg(filePath);
+      setOutput(result);  // Output location or status
+    } catch (error) {
+      setOutput(`Error: ${error.message}`);
+    }
+  };
+  
   return (
     <div className="App">
       <h1>Video Converter</h1>
       <button onClick={handleSelectFile}>Choose File</button>
       <p>Selected file: {filePath}</p>
-      <button onClick={handleConvert}>Convert to TS</button>
+      <button onClick={handleConvertToHLS}>Convert to TS</button>
       <pre>{output}</pre>
     </div>
   );
