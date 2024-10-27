@@ -21,15 +21,18 @@ function createWindow() {
 const ffmpegPath = path.resolve(__dirname, '../ffmpeg/ffmpeg.exe');
 const ffprobePath = path.resolve(__dirname, '../ffmpeg/ffprobe.exe');
 
-// Function to get HLS arguments for each resolution
-// Function to get HLS arguments for each resolution
+// Helper function to get the base name without extension
+function getBaseNameWithoutExt(filePath) {
+  return path.basename(filePath, path.extname(filePath));
+}
+
 function getHlsArguments(filePath, outputDir, width, height, resolutionLabel) {
   const outputPattern = path.join(outputDir, resolutionLabel, `${resolutionLabel}_%03d.ts`);
   const m3u8File = path.join(outputDir, resolutionLabel, `${resolutionLabel}.m3u8`);
 
   return [
     '-i', filePath,
-    '-vf', `scale=w=trunc(oh*a/2)*2:h=${height}:force_original_aspect_ratio=decrease`,
+    '-vf', `scale=${width}:${height}:force_original_aspect_ratio=decrease,pad=ceil(iw/2)*2:ceil(ih/2)*2`, // Ensures scaling and padding for each resolution
     '-c:a', 'aac',
     '-ar', '48000',
     '-b:a', '128k',
@@ -47,7 +50,6 @@ function getHlsArguments(filePath, outputDir, width, height, resolutionLabel) {
     m3u8File
   ];
 }
-
 
 // Function to get video resolution
 async function getVideoResolution(filePath) {
@@ -76,7 +78,7 @@ async function getVideoResolution(filePath) {
   });
 }
 
-// IPC handler to generate HLS streams
+// IPC handler to generate HLS streams with organized output structure
 ipcMain.handle('generate-hls', async (event, filePath, outputDir) => {
   const resolutions = [
     { width: 426, height: 240, label: '240p' },
@@ -86,17 +88,22 @@ ipcMain.handle('generate-hls', async (event, filePath, outputDir) => {
     { width: 1920, height: 1080, label: '1080p' }
   ];
 
-  // Call getVideoResolution directly instead of using ipcMain.invoke
+  // Get the base name of the input file to create a unique output folder
+  const baseName = getBaseNameWithoutExt(filePath);
+  const videoOutputDir = path.join(outputDir, baseName); // New directory for the video
+  fs.mkdirSync(videoOutputDir, { recursive: true });
+
+  // Call getVideoResolution directly to obtain resolution
   const videoResolution = await getVideoResolution(filePath);
-  const masterPlaylistPath = path.join(outputDir, 'master.m3u8');
+  const masterPlaylistPath = path.join(videoOutputDir, 'master.m3u8');
   const masterPlaylistLines = ['#EXTM3U'];
 
   for (const res of resolutions) {
     if (res.width <= videoResolution.width && res.height <= videoResolution.height) {
-      const resOutputDir = path.join(outputDir, res.label);
+      const resOutputDir = path.join(videoOutputDir, res.label);
       fs.mkdirSync(resOutputDir, { recursive: true });
-      
-      const args = getHlsArguments(filePath, outputDir, res.width, res.height, res.label);
+
+      const args = getHlsArguments(filePath, videoOutputDir, res.width, res.height, res.label);
       await new Promise((resolve, reject) => {
         execFile(ffmpegPath, args, (error) => {
           if (error) {
