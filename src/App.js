@@ -1,23 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 function App() {
   const [filePath, setFilePath] = useState(null);
   const [outputPath, setOutputPath] = useState(null);
   const [output, setOutput] = useState('');
+  const [progress, setProgress] = useState({});
 
-  // Handler to select input file
+  useEffect(() => {
+    // Listen for progress updates from Electron
+    window.electronAPI.onProgress((event, progressData) => {
+      setProgress((prevProgress) => ({
+        ...prevProgress,
+        [progressData.resolution]: progressData.frameCount,
+      }));
+    });
+  }, []);
+
   const handleSelectFile = async () => {
     const selectedFilePath = await window.electronAPI.selectFile();
     setFilePath(selectedFilePath);
   };
 
-  // Handler to select output folder
   const handleSelectFolder = async () => {
     const selectedFolderPath = await window.electronAPI.selectFolder();
     setOutputPath(selectedFolderPath);
   };
 
-  // Handler to convert video to HLS format
   const handleConvertToHLS = async () => {
     if (!filePath || !outputPath) {
       setOutput("Please select a file and output folder.");
@@ -25,9 +33,9 @@ function App() {
     }
 
     try {
-      // Call generateHls with the selected file and output paths
       const result = await window.electronAPI.generateHls(filePath, outputPath);
-      setOutput(result);  // Display result or success message
+      setOutput(result);
+      setProgress({}); // Reset progress after completion
     } catch (error) {
       setOutput(`Error: ${error.message}`);
     }
@@ -46,6 +54,16 @@ function App() {
       <button onClick={handleConvertToHLS}>Convert to HLS</button>
       
       <pre>{output}</pre>
+
+      {/* Display progress */}
+      {Object.keys(progress).length > 0 && (
+        <div>
+          <h3>Progress:</h3>
+          {Object.entries(progress).map(([resolution, frameCount]) => (
+            <p key={resolution}>{resolution}: {frameCount} frames processed</p>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
