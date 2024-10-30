@@ -8,7 +8,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-base-200 flex justify-center">
-      <div className="card w-full max-w-md bg-base-100 shadow-xl m-6">
+      <div className="card w-full max-w-[452px] bg-base-100 shadow-xl m-6 min-w-[450px]">
         <div className="card-body">
           <h1 className="card-title text-3xl font-bold text-center mb-6">Video Converter</h1>
 

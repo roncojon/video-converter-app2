@@ -21,11 +21,11 @@ function getHlsArguments(filePath, outputDir, width, height, resolutionLabel) {
     '-i', filePath,
     '-vf', `scale=${width}:${height}:force_original_aspect_ratio=decrease,pad=ceil(iw/2)*2:ceil(ih/2)*2`,
     '-c:a', 'aac',                      // Audio codec for HLS compatibility
-    '-ar', '48000',                     // Standard audio sample rate
-    '-b:a', '96k',                      // Lower audio bitrate to save bandwidth
-    '-c:v', 'libx264',                  // Video codec optimized for HLS compatibility
+    '-ar', '32000',                     // Standard audio sample rate          !!RETURN TO 48K later
+    '-b:a', '96k',                      // Lower audio bitrate to save bandwidth    !!IMPORTANT RETURN TO 128K later
+    '-c:v', 'libx264',                  // Video codec optimized for HLS compatibility  
     '-profile:v', 'main',               // Suitable for compatibility with most devices
-    '-preset', 'fast',                  // Fast encoding preset for speed over compression
+    '-preset', 'verySlow',                  // Fast encoding preset for speed over compression   !!IMPORTANT
     '-crf', '22',                       // Slightly lower quality factor for faster encoding
     '-sc_threshold', '0',               // Forces keyframes at scene changes only
     '-g', '48',                         // GOP size matching twice the frame rate (for 24fps video)
