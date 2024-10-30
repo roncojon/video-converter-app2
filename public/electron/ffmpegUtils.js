@@ -20,23 +20,25 @@ function getHlsArguments(filePath, outputDir, width, height, resolutionLabel) {
   return [
     '-i', filePath,
     '-vf', `scale=${width}:${height}:force_original_aspect_ratio=decrease,pad=ceil(iw/2)*2:ceil(ih/2)*2`,
-    '-c:a', 'aac',
-    '-ar', '48000',
-    '-b:a', '128k',
-    '-c:v', 'h264',
-    '-profile:v', 'main',
-    '-crf', '20',
-    '-sc_threshold', '0',
-    '-g', '48',
-    '-keyint_min', '48',
-    '-hls_time', '6',
-    '-hls_playlist_type', 'vod',
-    '-hls_segment_filename', outputPattern,
-    '-hls_flags', 'independent_segments',
-    '-f', 'hls',
+    '-c:a', 'aac',                      // Audio codec for HLS compatibility
+    '-ar', '48000',                     // Standard audio sample rate
+    '-b:a', '96k',                      // Lower audio bitrate to save bandwidth
+    '-c:v', 'libx264',                  // Video codec optimized for HLS compatibility
+    '-profile:v', 'main',               // Suitable for compatibility with most devices
+    '-preset', 'fast',                  // Fast encoding preset for speed over compression
+    '-crf', '22',                       // Slightly lower quality factor for faster encoding
+    '-sc_threshold', '0',               // Forces keyframes at scene changes only
+    '-g', '48',                         // GOP size matching twice the frame rate (for 24fps video)
+    '-keyint_min', '48',                // Minimum interval between keyframes
+    '-hls_time', '6',                   // Shorter segment duration to reduce initial loading time
+    '-hls_playlist_type', 'vod',        // Video on demand for non-live content
+    '-hls_flags', 'independent_segments', // Allows each segment to decode independently
+    '-hls_segment_filename', outputPattern, // Filename pattern for each segment
+    '-f', 'hls',                        // HLS format for streaming
     m3u8File
   ];
 }
+
 
 // Function to get video resolution
 async function getVideoResolution(filePath) {
