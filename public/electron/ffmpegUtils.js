@@ -67,17 +67,17 @@ async function getVideoResolution(filePath) {
 
 // New function to generate thumbnails and a .vtt file
 function generateThumbnails(filePath, outputDir, interval = 5) {
+  const timedImagesDir = path.join(outputDir, 'timed_images', 'thumbnails'); // Store images in timed_images/thumbnails
+  const vttFilePath = path.join(outputDir, 'timed_images', 'thumbnails.vtt'); // Store .vtt in timed_images
+
+  // Create the timed_images/thumbnails directory if it doesn't exist
+  fs.mkdirSync(timedImagesDir, { recursive: true });
+
   const baseName = getBaseNameWithoutExt(filePath);
-  const thumbnailsDir = path.join(outputDir, baseName, 'thumbnails');
-  const vttFilePath = path.join(outputDir, baseName, 'thumbnails.vtt');
-
-  // Create the thumbnails directory if it doesn't exist
-  fs.mkdirSync(thumbnailsDir, { recursive: true });
-
   const args = [
     '-i', filePath,
     '-vf', `fps=1/${interval},scale=160:-1`, // 1 frame per interval seconds, width 160, height auto
-    path.join(thumbnailsDir, `${baseName}_%03d.jpg`)
+    path.join(timedImagesDir, `thumb_%04d.jpg`) // Naming thumbnails as thumb_0001.jpg, thumb_0002.jpg, etc.
   ];
 
   return new Promise((resolve, reject) => {
@@ -86,23 +86,23 @@ function generateThumbnails(filePath, outputDir, interval = 5) {
         reject(error);
       } else {
         // Generate .vtt file from the created thumbnails
-        const files = fs.readdirSync(thumbnailsDir).filter(f => f.endsWith('.jpg')).sort();
+        const files = fs.readdirSync(timedImagesDir).filter(f => f.endsWith('.jpg')).sort();
         const vttContent = ['WEBVTT\n'];
 
         files.forEach((file, index) => {
-          const timestamp = `${index * interval}`; // Calculate seconds based on interval
+          const timestamp = index * interval; // Calculate seconds based on interval
           const hours = String(Math.floor(timestamp / 3600)).padStart(2, '0');
           const minutes = String(Math.floor((timestamp % 3600) / 60)).padStart(2, '0');
           const seconds = String(timestamp % 60).padStart(2, '0');
 
-          const nextTimestamp = `${(index + 1) * interval}`;
+          const nextTimestamp = (index + 1) * interval;
           const nextHours = String(Math.floor(nextTimestamp / 3600)).padStart(2, '0');
           const nextMinutes = String(Math.floor((nextTimestamp % 3600) / 60)).padStart(2, '0');
           const nextSeconds = String(nextTimestamp % 60).padStart(2, '0');
 
           vttContent.push(
             `${hours}:${minutes}:${seconds}.000 --> ${nextHours}:${nextMinutes}:${nextSeconds}.000`,
-            path.join('thumbnails', file),
+            path.join('thumbnails', file), // Use relative path for thumbnails
             ''
           );
         });
@@ -113,6 +113,7 @@ function generateThumbnails(filePath, outputDir, interval = 5) {
     });
   });
 }
+
 
 module.exports = {
   ffmpegPath,
