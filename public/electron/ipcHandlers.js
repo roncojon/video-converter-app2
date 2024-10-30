@@ -8,6 +8,7 @@ const {
   getBaseNameWithoutExt,
   getHlsArguments,
   getVideoResolution,
+  generateThumbnails // Import the generateThumbnails function from ffmpegUtils.js
 } = require('./ffmpegUtils');
 
 function setupIpcHandlers() {
@@ -62,7 +63,7 @@ function logToFile(message) {
   fs.appendFileSync(logFilePath, `${new Date().toISOString()} - ${message}\n`);
 }
 
-// Helper function to convert a video to HLS format
+// Helper function to convert a video to HLS format and generate thumbnails for .vtt
 async function convertVideoToHLS(event, filePath, outputDir) {
   const resolutions = [
     { width: 426, height: 240, label: '240p' },
@@ -82,13 +83,12 @@ async function convertVideoToHLS(event, filePath, outputDir) {
   const videoResolution = await getVideoResolution(filePath);
   const { width: videoWidth, height: videoHeight } = videoResolution;
   console.log("Detected video resolution:", videoResolution);
-  // logToFile(`Detected video resolution: ${videoWidth}x${videoHeight}`);
-  // Determine the smaller dimension for resolution filtering
+
   const minDimension = Math.min(videoWidth, videoHeight);
 
   // Filter resolutions to include all lower or matching resolutions based on the smaller dimension
   const applicableResolutions = resolutions.filter(res => Math.min(res.width, res.height) <= minDimension);
-
+  
   // Use the closest applicable resolutions or fallback to the highest supported
   const selectedResolutions = applicableResolutions.length
     ? applicableResolutions
@@ -96,11 +96,10 @@ async function convertVideoToHLS(event, filePath, outputDir) {
 
   console.log("Selected resolutions for conversion:", selectedResolutions);
   // logToFile(`Selected resolutions for conversion: ${selectedResolutions.map(res => res.label).join(', ')}`);
-
   const masterPlaylistPath = path.join(videoOutputDir, 'master.m3u8');
   const masterPlaylistLines = ['#EXTM3U'];
 
-  for (const res of selectedResolutions) {
+  for (const res of applicableResolutions) {
     const resOutputDir = path.join(videoOutputDir, res.label);
     fs.mkdirSync(resOutputDir, { recursive: true });
 
@@ -131,11 +130,17 @@ async function convertVideoToHLS(event, filePath, outputDir) {
   }
 
   fs.writeFileSync(masterPlaylistPath, masterPlaylistLines.join('\n'));
-  return `Master playlist created at ${masterPlaylistPath}`;
+
+  // Generate Thumbnails and .vtt file
+  try {
+    const vttFilePath = await generateThumbnails(filePath, videoOutputDir, 5); // Adjust interval as desired
+    event.sender.send('thumbnail-progress', { message: `Thumbnails and VTT file created: ${vttFilePath}` });
+  } catch (error) {
+    console.error("Error generating thumbnails:", error);
+    logToFile(`Error generating thumbnails: ${error.message}`);
+  }
+
+  return `Master playlist and VTT file created at ${masterPlaylistPath}`;
 }
-
-
-
-
 
 module.exports = { setupIpcHandlers };

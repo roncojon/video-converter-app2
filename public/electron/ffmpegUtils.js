@@ -1,5 +1,7 @@
+// public/electron/ffmpegUtils.js
+
 const path = require('path');
-const { execFile } = require('child_process');
+const { execFile, spawn } = require('child_process');
 const fs = require('fs');
 
 const ffmpegPath = path.resolve(__dirname, '../ffmpeg/ffmpeg.exe');
@@ -63,9 +65,59 @@ async function getVideoResolution(filePath) {
   });
 }
 
+// New function to generate thumbnails and a .vtt file
+function generateThumbnails(filePath, outputDir, interval = 5) {
+  const baseName = getBaseNameWithoutExt(filePath);
+  const thumbnailsDir = path.join(outputDir, baseName, 'thumbnails');
+  const vttFilePath = path.join(outputDir, baseName, 'thumbnails.vtt');
+
+  // Create the thumbnails directory if it doesn't exist
+  fs.mkdirSync(thumbnailsDir, { recursive: true });
+
+  const args = [
+    '-i', filePath,
+    '-vf', `fps=1/${interval},scale=160:-1`, // 1 frame per interval seconds, width 160, height auto
+    path.join(thumbnailsDir, `${baseName}_%03d.jpg`)
+  ];
+
+  return new Promise((resolve, reject) => {
+    execFile(ffmpegPath, args, (error) => {
+      if (error) {
+        reject(error);
+      } else {
+        // Generate .vtt file from the created thumbnails
+        const files = fs.readdirSync(thumbnailsDir).filter(f => f.endsWith('.jpg')).sort();
+        const vttContent = ['WEBVTT\n'];
+
+        files.forEach((file, index) => {
+          const timestamp = `${index * interval}`; // Calculate seconds based on interval
+          const hours = String(Math.floor(timestamp / 3600)).padStart(2, '0');
+          const minutes = String(Math.floor((timestamp % 3600) / 60)).padStart(2, '0');
+          const seconds = String(timestamp % 60).padStart(2, '0');
+
+          const nextTimestamp = `${(index + 1) * interval}`;
+          const nextHours = String(Math.floor(nextTimestamp / 3600)).padStart(2, '0');
+          const nextMinutes = String(Math.floor((nextTimestamp % 3600) / 60)).padStart(2, '0');
+          const nextSeconds = String(nextTimestamp % 60).padStart(2, '0');
+
+          vttContent.push(
+            `${hours}:${minutes}:${seconds}.000 --> ${nextHours}:${nextMinutes}:${nextSeconds}.000`,
+            path.join('thumbnails', file),
+            ''
+          );
+        });
+
+        fs.writeFileSync(vttFilePath, vttContent.join('\n'));
+        resolve(vttFilePath);
+      }
+    });
+  });
+}
+
 module.exports = {
   ffmpegPath,
   getBaseNameWithoutExt,
   getHlsArguments,
   getVideoResolution,
+  generateThumbnails, // Export the new function
 };
