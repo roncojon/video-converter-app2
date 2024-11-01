@@ -146,7 +146,7 @@ async function saveExtraInfo(filePath, outputDir) {
 
 // New function to generate thumbnails and a .vtt file
 function generateFrameImages(filePath, outputDir, interval = 5) {
-  const timedImagesDir = path.join(outputDir, 'timed_images'); // Store images in timed_images/thumbnails
+  const timedImagesDir = path.join(outputDir, 'timed_images'); // Store images in timed_images
   const vttFilePath = path.join(outputDir, 'timed_images', 'timed_images.vtt'); // Store .vtt in timed_images
 
   // Create the timed_images/thumbnails directory if it doesn't exist
@@ -181,7 +181,7 @@ function generateFrameImages(filePath, outputDir, interval = 5) {
 
           vttContent.push(
             `${hours}:${minutes}:${seconds}.000 --> ${nextHours}:${nextMinutes}:${nextSeconds}.000`,
-            path.join('thumbnails', file), // Use relative path for thumbnails
+            path.join(file), // Use relative path for thumbnails
             ''
           );
         });
