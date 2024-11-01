@@ -1,7 +1,10 @@
 {
   "name": "video-converter-app",
   "version": "0.1.0",
+  "description": "A video converter application using Electron and React.",
+  "author": "Your Name",
   "private": true,
+  "homepage": ".",
   "main": "public/electron/electron.js",
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
@@ -49,12 +52,13 @@
     "appId": "com.yourcompany.video-converter-app",
     "productName": "Video Converter App",
     "directories": {
-      "buildResources": "public"
+      "buildResources": "assets" 
     },
     "files": [
       "build/**/*",
       "public/electron/**/*",
-      "public/ffmpeg/**/*"
+      "public/ffmpeg/**/*",
+      "node_modules/**/*" 
     ],
     "extraResources": [
       {
@@ -63,8 +67,11 @@
         "filter": ["**/*"]
       }
     ],
+    "extraMetadata": {
+      "main": "public/electron/electron.js"
+    },
     "win": {
-      "target": "nsis"
+      "target": ["portable"]
     },
     "mac": {
       "target": "dmg"

@@ -14,10 +14,10 @@ function createWindow() {
   });
 
   if (app.isPackaged) {
-    // Load the production build
-    win.loadFile(path.join(__dirname, '../build/index.html'));
+    // Load index.html from the build folder in production
+    win.loadFile(path.join(app.getAppPath(), 'build', 'index.html'));
   } else {
-    // Load the React app in development
+    // Load the React development server in development
     win.loadURL('http://localhost:3000');
   }
 }
