@@ -3,10 +3,19 @@
 const path = require('path');
 const { execFile, spawn } = require('child_process');
 const fs = require('fs');
+const { app } = require('electron');
 
-const ffmpegPath = path.resolve(__dirname, '../ffmpeg/ffmpeg.exe');
-const ffprobePath = path.resolve(__dirname, '../ffmpeg/ffprobe.exe');
+// const ffmpegPath = path.resolve(__dirname, '../ffmpeg/ffmpeg.exe');
+// const ffprobePath = path.resolve(__dirname, '../ffmpeg/ffprobe.exe');
 
+
+const ffmpegPath = app.isPackaged 
+  ? path.join(process.resourcesPath, 'ffmpeg', 'ffmpeg.exe') 
+  : path.join(__dirname, '../public/ffmpeg/ffmpeg.exe');
+
+const ffprobePath = app.isPackaged 
+  ? path.join(process.resourcesPath, 'ffmpeg', 'ffprobe.exe') 
+  : path.join(__dirname, '../public/ffmpeg/ffprobe.exe');
 // Helper function to get the base name without extension
 function getBaseNameWithoutExt(filePath) {
   return path.basename(filePath, path.extname(filePath));

@@ -44,5 +44,33 @@
     "electron": "^33.0.2",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.14"
+  },
+  "build": {
+    "appId": "com.yourcompany.video-converter-app",
+    "productName": "Video Converter App",
+    "directories": {
+      "buildResources": "public"
+    },
+    "files": [
+      "build/**/*",
+      "public/electron/**/*",
+      "public/ffmpeg/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "public/ffmpeg",
+        "to": "ffmpeg",
+        "filter": ["**/*"]
+      }
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
   }
 }

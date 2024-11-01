@@ -13,7 +13,13 @@ function createWindow() {
     },
   });
 
-  win.loadURL('http://localhost:3000');
+  if (app.isPackaged) {
+    // Load the production build
+    win.loadFile(path.join(__dirname, '../build/index.html'));
+  } else {
+    // Load the React app in development
+    win.loadURL('http://localhost:3000');
+  }
 }
 
 app.on('ready', () => {
