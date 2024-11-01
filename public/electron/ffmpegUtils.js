@@ -9,13 +9,21 @@ const { app } = require('electron');
 // const ffprobePath = path.resolve(__dirname, '../ffmpeg/ffprobe.exe');
 
 
-const ffmpegPath = app.isPackaged 
+// const ffmpegPath = app.isPackaged 
+//   ? path.join(process.resourcesPath, 'ffmpeg', 'ffmpeg.exe') 
+//   : path.join(__dirname, '../public/ffmpeg/ffmpeg.exe');
+
+// const ffprobePath = app.isPackaged 
+//   ? path.join(process.resourcesPath, 'ffmpeg', 'ffprobe.exe') 
+//   : path.join(__dirname, '../public/ffmpeg/ffprobe.exe');
+
+  const ffmpegPath = app.isPackaged 
   ? path.join(process.resourcesPath, 'ffmpeg', 'ffmpeg.exe') 
-  : path.join(__dirname, '../public/ffmpeg/ffmpeg.exe');
+  : path.join(__dirname, '../ffmpeg/ffmpeg.exe');
 
 const ffprobePath = app.isPackaged 
   ? path.join(process.resourcesPath, 'ffmpeg', 'ffprobe.exe') 
-  : path.join(__dirname, '../public/ffmpeg/ffprobe.exe');
+  : path.join(__dirname, '../ffmpeg/ffprobe.exe');
 // Helper function to get the base name without extension
 function getBaseNameWithoutExt(filePath) {
   return path.basename(filePath, path.extname(filePath));
@@ -146,7 +154,7 @@ async function saveExtraInfo(filePath, outputDir) {
 
 // New function to generate thumbnails and a .vtt file
 function generateFrameImages(filePath, outputDir, interval = 5) {
-  const timedImagesDir = path.join(outputDir, 'timed_images'); // Store images in timed_images
+  const timedImagesDir = path.join(outputDir, 'timed_images'); // Store images in timed_images/thumbnails
   const vttFilePath = path.join(outputDir, 'timed_images', 'timed_images.vtt'); // Store .vtt in timed_images
 
   // Create the timed_images/thumbnails directory if it doesn't exist
