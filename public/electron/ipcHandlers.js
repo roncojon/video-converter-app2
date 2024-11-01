@@ -5,10 +5,12 @@ const path = require('path');
 const { execFile, spawn } = require('child_process'); // Use spawn for progress tracking
 const {
   ffmpegPath,
+  saveExtraInfo,
   getBaseNameWithoutExt,
   getHlsArguments,
   getVideoResolution,
-  generateThumbnails // Import the generateThumbnails function from ffmpegUtils.js
+  generateThumbnails, // Import the generateThumbnails function from ffmpegUtils.js
+  generateFrameImages
 } = require('./ffmpegUtils');
 
 function setupIpcHandlers() {
@@ -140,7 +142,27 @@ async function convertVideoToHLS(event, filePath, outputDir) {
     logToFile(`Error generating thumbnails: ${error.message}`);
   }
 
-  return `Master playlist and VTT file created at ${masterPlaylistPath}`;
+  // Generate extraInfo.txt with video details
+  try {
+    const extraInfoPath = await saveExtraInfo(filePath, videoOutputDir);
+    event.sender.send('extra-info-progress', { message: `Extra info saved to: ${extraInfoPath}` });
+  } catch (error) {
+    console.error("Error saving extra info:", error);
+    logToFile(`Error saving extra info: ${error.message}`);
+  }
+
+  // Generate HD and low-resolution images from 40% of video duration
+  try {
+    const [hdImagePath, lowResImagePath] = await generateFrameImages(filePath, videoOutputDir);
+    event.sender.send('frame-images-progress', {
+      message: `HD and low-res images created at: ${hdImagePath}, ${lowResImagePath}`
+    });
+  } catch (error) {
+    console.error("Error generating frame images:", error);
+    logToFile(`Error generating frame images: ${error.message}`);
+  }
+
+  return `Master playlist, VTT file, extra info, and frame images created at ${masterPlaylistPath}`;
 }
 
 module.exports = { setupIpcHandlers };

@@ -67,6 +67,74 @@ async function getVideoResolution(filePath) {
   });
 }
 
+// Function to get video duration, max resolution, and HD flag, and save to extraInfo.txt
+async function saveExtraInfo(filePath, outputDir) {
+  const durationArgs = [
+    '-v', 'error',
+    '-select_streams', 'v:0',
+    '-show_entries', 'format=duration',
+    '-of', 'default=noprint_wrappers=1:nokey=1',
+    filePath
+  ];
+
+  const resolutionArgs = [
+    '-v', 'error',
+    '-select_streams', 'v:0',
+    '-show_entries', 'stream=width,height',
+    '-of', 'json',
+    filePath
+  ];
+
+  // Helper function to determine if a resolution is HD (720p or higher)
+  function isHD(width, height) {
+    return (width >= 1280 && height >= 720) || (width >= 720 && height >= 1280) ? 1 : 0;
+  }
+
+  return new Promise((resolve, reject) => {
+    // Run ffprobe for duration
+    execFile(ffprobePath, durationArgs, (durationError, durationStdout) => {
+      if (durationError) {
+        reject(durationError);
+      } else {
+        const duration = Math.ceil(parseFloat(durationStdout.trim()));
+
+        // Run ffprobe for resolution
+        execFile(ffprobePath, resolutionArgs, (resolutionError, resolutionStdout) => {
+          if (resolutionError) {
+            reject(resolutionError);
+          } else {
+            const { streams } = JSON.parse(resolutionStdout);
+            if (streams && streams[0]) {
+              const { width, height } = streams[0];
+              const maxResolution = {
+                width,
+                height,
+                label: `${height}p`
+              };
+
+              // Determine HD flag based on max resolution
+              const HD = isHD(width, height);
+
+              // Save information to extraInfo.txt
+              const extraInfoPath = path.join(outputDir, 'extraInfo.txt');
+              const extraInfoContent = [
+                `durationInSeconds: ${duration}`,
+                `maxResolution: { width: ${width}, height: ${height}, label: '${maxResolution.label}' }`,
+                `HD: ${HD}`
+              ].join('\n');
+              fs.writeFileSync(extraInfoPath, extraInfoContent);
+              resolve(extraInfoPath);
+            } else {
+              reject(new Error("Could not retrieve video resolution"));
+            }
+          }
+        });
+      }
+    });
+  });
+}
+
+
 // New function to generate thumbnails and a .vtt file
 function generateThumbnails(filePath, outputDir, interval = 5) {
   const timedImagesDir = path.join(outputDir, 'timed_images', 'thumbnails'); // Store images in timed_images/thumbnails
@@ -75,7 +143,7 @@ function generateThumbnails(filePath, outputDir, interval = 5) {
   // Create the timed_images/thumbnails directory if it doesn't exist
   fs.mkdirSync(timedImagesDir, { recursive: true });
 
-  const baseName = getBaseNameWithoutExt(filePath);
+  // const baseName = getBaseNameWithoutExt(filePath);
   const args = [
     '-i', filePath,
     '-vf', `fps=1/${interval},scale=160:-1`, // 1 frame per interval seconds, width 160, height auto
@@ -116,11 +184,85 @@ function generateThumbnails(filePath, outputDir, interval = 5) {
   });
 }
 
+// New function to generate HD and low-resolution images from the frame at 40% of the video duration
+async function generateFrameImages(filePath, outputDir) {
+  // Get the video duration to calculate the 40% timestamp
+  const durationArgs = [
+    '-v', 'error',
+    '-select_streams', 'v:0',
+    '-show_entries', 'format=duration',
+    '-of', 'default=noprint_wrappers=1:nokey=1',
+    filePath
+  ];
+
+  const duration = await new Promise((resolve, reject) => {
+    execFile(ffprobePath, durationArgs, (error, stdout) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(Math.ceil(parseFloat(stdout.trim())));
+      }
+    });
+  });
+
+  const timestamp = Math.floor(duration * 0.4); // Calculate 40% of video duration
+
+  // Create the thumbnails directory inside the outputDir
+  const thumbnailsDir = path.join(outputDir, 'thumbnails');
+  fs.mkdirSync(thumbnailsDir, { recursive: true });
+
+  const hdImagePath = path.join(thumbnailsDir, 'hd_image.jpg');
+  const lowResImagePath = path.join(thumbnailsDir, 'low_res_image.jpg');
+
+  // Arguments for extracting HD image
+  const hdArgs = [
+    '-ss', `${timestamp}`,          // Seek to the timestamp (40% of video duration)
+    '-i', filePath,
+    '-frames:v', '1',               // Capture a single frame
+    '-q:v', '2',                    // Set quality for HD (lower values are higher quality)
+    hdImagePath
+  ];
+
+  // Arguments for extracting low-resolution image
+  const lowResArgs = [
+    '-ss', `${timestamp}`,
+    '-i', filePath,
+    '-frames:v', '1',
+    '-vf', 'scale=320:-1',          // Resize to low resolution (e.g., 320px width)
+    '-q:v', '5',                    // Set quality for lower resolution
+    lowResImagePath
+  ];
+
+  // Run both processes to generate the images
+  return Promise.all([
+    new Promise((resolve, reject) => {
+      execFile(ffmpegPath, hdArgs, (error) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(hdImagePath);
+        }
+      });
+    }),
+    new Promise((resolve, reject) => {
+      execFile(ffmpegPath, lowResArgs, (error) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(lowResImagePath);
+        }
+      });
+    })
+  ]);
+}
 
 module.exports = {
   ffmpegPath,
+  saveExtraInfo,
   getBaseNameWithoutExt,
   getHlsArguments,
   getVideoResolution,
-  generateThumbnails, // Export the new function
+  generateThumbnails,
+  generateFrameImages // Export the new function
 };
+
