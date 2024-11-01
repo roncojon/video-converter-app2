@@ -136,9 +136,9 @@ async function saveExtraInfo(filePath, outputDir) {
 
 
 // New function to generate thumbnails and a .vtt file
-function generateThumbnails(filePath, outputDir, interval = 5) {
-  const timedImagesDir = path.join(outputDir, 'timed_images', 'thumbnails'); // Store images in timed_images/thumbnails
-  const vttFilePath = path.join(outputDir, 'timed_images', 'thumbnails.vtt'); // Store .vtt in timed_images
+function generateFrameImages(filePath, outputDir, interval = 5) {
+  const timedImagesDir = path.join(outputDir, 'timed_images'); // Store images in timed_images/thumbnails
+  const vttFilePath = path.join(outputDir, 'timed_images', 'timed_images.vtt'); // Store .vtt in timed_images
 
   // Create the timed_images/thumbnails directory if it doesn't exist
   fs.mkdirSync(timedImagesDir, { recursive: true });
@@ -185,7 +185,7 @@ function generateThumbnails(filePath, outputDir, interval = 5) {
 }
 
 // New function to generate HD and low-resolution images from the frame at 40% of the video duration
-async function generateFrameImages(filePath, outputDir) {
+async function generateThumbnails(filePath, outputDir) {
   // Get the video duration to calculate the 40% timestamp
   const durationArgs = [
     '-v', 'error',
@@ -228,7 +228,7 @@ async function generateFrameImages(filePath, outputDir) {
     '-ss', `${timestamp}`,
     '-i', filePath,
     '-frames:v', '1',
-    '-vf', 'scale=320:-1',          // Resize to low resolution (e.g., 320px width)
+    '-vf', 'scale=640:-1',          // Resize to low resolution (e.g., 320px width)
     '-q:v', '5',                    // Set quality for lower resolution
     lowResImagePath
   ];
@@ -262,7 +262,7 @@ module.exports = {
   getBaseNameWithoutExt,
   getHlsArguments,
   getVideoResolution,
-  generateThumbnails,
-  generateFrameImages // Export the new function
+  generateFrameImages,
+  generateThumbnails // Export the new function
 };
 
