@@ -19,6 +19,12 @@ function SingleVideoConversion() {
   const handleSelectFile = async () => {
     const selectedFilePath = await window.electronAPI.selectFile();
     setFilePath(selectedFilePath);
+
+    // Extract the directory path from the selected file path
+    if (selectedFilePath) {
+      const directoryPath = selectedFilePath.substring(0, selectedFilePath.lastIndexOf('/')) || selectedFilePath.substring(0, selectedFilePath.lastIndexOf('\\'));
+      setOutputPath(directoryPath);
+    }
   };
 
   const handleSelectFolder = async () => {

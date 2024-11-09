@@ -1,21 +1,9 @@
 // public/electron/ffmpegUtils.js
 
 const path = require('path');
-const { execFile, spawn } = require('child_process');
+const { execFile } = require('child_process');
 const fs = require('fs');
 const { app } = require('electron');
-
-// const ffmpegPath = path.resolve(__dirname, '../ffmpeg/ffmpeg.exe');
-// const ffprobePath = path.resolve(__dirname, '../ffmpeg/ffprobe.exe');
-
-
-// const ffmpegPath = app.isPackaged 
-//   ? path.join(process.resourcesPath, 'ffmpeg', 'ffmpeg.exe') 
-//   : path.join(__dirname, '../public/ffmpeg/ffmpeg.exe');
-
-// const ffprobePath = app.isPackaged 
-//   ? path.join(process.resourcesPath, 'ffmpeg', 'ffprobe.exe') 
-//   : path.join(__dirname, '../public/ffmpeg/ffprobe.exe');
 
   const ffmpegPath = app.isPackaged 
   ? path.join(process.resourcesPath, 'ffmpeg', 'ffmpeg.exe') 
@@ -37,6 +25,7 @@ function getHlsArguments(filePath, outputDir, width, height, resolutionLabel) {
   return [
     '-i', filePath,
     '-vf', `scale=${width}:${height}:force_original_aspect_ratio=decrease,pad=ceil(iw/2)*2:ceil(ih/2)*2`,
+    // '-threads','0',
     '-c:a', 'aac',                      // Audio codec for HLS compatibility
     '-ar', '32000',                     // Standard audio sample rate          !!RETURN TO 48K later
     '-b:a', '96k',                      // Lower audio bitrate to save bandwidth    !!IMPORTANT RETURN TO 128K later
@@ -55,7 +44,6 @@ function getHlsArguments(filePath, outputDir, width, height, resolutionLabel) {
     m3u8File
   ];
 }
-
 
 // Function to get video resolution
 async function getVideoResolution(filePath) {
@@ -150,7 +138,6 @@ async function saveExtraInfo(filePath, outputDir) {
     });
   });
 }
-
 
 // New function to generate thumbnails and a .vtt file
 function generateFrameImages(filePath, outputDir, interval = 5) {

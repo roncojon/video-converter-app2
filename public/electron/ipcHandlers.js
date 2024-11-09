@@ -2,7 +2,7 @@
 const { ipcMain, dialog } = require('electron');
 const fs = require('fs');
 const path = require('path');
-const { execFile, spawn } = require('child_process'); // Use spawn for progress tracking
+const { spawn } = require('child_process'); // Use spawn for progress tracking
 const {
   ffmpegPath,
   saveExtraInfo,
@@ -114,7 +114,8 @@ async function convertVideoToHLS(event, filePath, outputDir) {
 
     const args = getHlsArguments(filePath, videoOutputDir, res.width, res.height, res.label);
     const ffmpegProcess = spawn(ffmpegPath, args);
-
+    // const ffmpegProcess = spawn(ffmpegPath, args, { priority: -20 }); // -20 is highest priority in Node.js
+    
     ffmpegProcess.stderr.on('data', (data) => {
       const output = data.toString();
       const match = output.match(/frame=\s*(\d+)/);
