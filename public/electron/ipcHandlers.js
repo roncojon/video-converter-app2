@@ -28,7 +28,7 @@ function setupIpcHandlers() {
   ipcMain.handle('get-cpu-count', async () => {
     return os.cpus().length;
   });
-  
+
   // Handler for selecting a folder
   ipcMain.handle('select-folder', async () => {
     const { canceled, filePaths } = await dialog.showOpenDialog({
@@ -76,9 +76,9 @@ function logToFile(message) {
 
 // Helper function to convert a video to HLS format and generate thumbnails for .vtt
 async function convertVideoToHLS(event, filePath, outputDir, cpuSelection, priorityLevel) {
-  console.log('cpuSelectioncpuSelection:',cpuSelection)
-  console.log('cpuSelectioncpuSelection:',cpuSelection)
-  console.log('priorityLevelpriorityLevel:',priorityLevel)
+  console.log('cpuSelectioncpuSelection:', cpuSelection)
+  console.log('cpuSelectioncpuSelection:', cpuSelection)
+  console.log('priorityLevelpriorityLevel:', priorityLevel)
   const resolutions = [
     { width: 426, height: 240, label: '240p' },
     { width: 640, height: 360, label: '360p' },
@@ -99,15 +99,13 @@ async function convertVideoToHLS(event, filePath, outputDir, cpuSelection, prior
   }
 
   fs.mkdirSync(videoOutputDir, { recursive: true });
-
-  // Map priority level to Node.js priority values
+  // Priority mapping based on Windows priority values
   const priorityMapping = {
-    low: 10,      // Low priority
-    normal: 0,    // Normal priority
-    high: -10     // High priority
+    low: 64,      // Low priority in Windows wmic
+    normal: 32,   // Normal priority in Windows wmic
+    high: 128     // High priority in Windows wmic
   };
-  const priority = priorityMapping[priorityLevel] || 0; // Default to normal if not specified
-
+  const priorityValue = priorityMapping[priorityLevel] || 32;
   // Get the video resolution and log it
   const videoResolution = await getVideoResolution(filePath);
   const { width: videoWidth, height: videoHeight } = videoResolution;
@@ -135,7 +133,16 @@ async function convertVideoToHLS(event, filePath, outputDir, cpuSelection, prior
     const args = getHlsArguments(filePath, videoOutputDir, res.width, res.height, res.label, cpuSelection);
     // args.unshift('-threads', cpuSelection); // Add thread count to FFmpeg arguments
 
-    const ffmpegProcess = spawn(ffmpegPath, args, { priority });
+    const ffmpegProcess = spawn(ffmpegPath, args/* , { priority } */);
+
+    // Helper function to set process priority on Windows
+    function setWindowsProcessPriority(pid, priority) {
+      const wmicCommand = `wmic process where ProcessId=${pid} CALL setpriority ${priority}`;
+      spawn('cmd', ['/c', wmicCommand], { windowsHide: true });
+    }
+
+    // Set priority after the process starts
+    setWindowsProcessPriority(ffmpegProcess.pid, priorityValue);
 
     ffmpegProcess.stderr.on('data', (data) => {
       const output = data.toString();
