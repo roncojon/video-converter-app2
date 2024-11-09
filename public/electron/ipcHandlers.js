@@ -46,6 +46,14 @@ function setupIpcHandlers() {
 
     for (const file of videoFiles) {
       const filePath = path.join(folderPath, file);
+      const outputFolderName = path.join(outputDir, path.parse(file).name); // Folder name based on video name
+
+      // Check if the output folder already exists
+      if (fs.existsSync(outputFolderName)) {
+        event.sender.send('conversion-progress', { message: `Skipping ${file}: output folder already exists.` });
+        continue; // Skip to the next file
+      }
+
       try {
         await convertVideoToHLS(event, filePath, outputDir);
       } catch (error) {
@@ -53,8 +61,9 @@ function setupIpcHandlers() {
       }
     }
 
-    return `All videos in ${folderPath} have been converted to HLS.`;
+    return `All videos in ${folderPath} have been processed.`;
   });
+
 }
 
 // Define log file path
@@ -90,7 +99,7 @@ async function convertVideoToHLS(event, filePath, outputDir) {
 
   // Filter resolutions to include all lower or matching resolutions based on the smaller dimension
   const applicableResolutions = resolutions.filter(res => Math.min(res.width, res.height) <= minDimension);
-  
+
   // Use the closest applicable resolutions or fallback to the highest supported
   const selectedResolutions = applicableResolutions.length
     ? applicableResolutions
