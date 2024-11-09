@@ -19,6 +19,11 @@ function FolderVideoConversion() {
   const handleSelectFolder = async () => {
     const selectedFolderPath = await window.electronAPI.selectFolder();
     setFolderPath(selectedFolderPath);
+
+    // Set the output folder to the selected folder by default if not already set
+    if (!outputPath) {
+      setOutputPath(selectedFolderPath);
+    }
   };
 
   const handleSelectOutputFolder = async () => {

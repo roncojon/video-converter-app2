@@ -46,14 +46,6 @@ function setupIpcHandlers() {
 
     for (const file of videoFiles) {
       const filePath = path.join(folderPath, file);
-      const outputFolderName = path.join(outputDir, path.parse(file).name); // Folder name based on video name
-
-      // Check if the output folder already exists
-      if (fs.existsSync(outputFolderName)) {
-        event.sender.send('conversion-progress', { message: `Skipping ${file}: output folder already exists.` });
-        continue; // Skip to the next file
-      }
-
       try {
         await convertVideoToHLS(event, filePath, outputDir);
       } catch (error) {
@@ -61,9 +53,8 @@ function setupIpcHandlers() {
       }
     }
 
-    return `All videos in ${folderPath} have been processed.`;
+    return `All videos in ${folderPath} have been converted to HLS.`;
   });
-
 }
 
 // Define log file path
@@ -88,6 +79,13 @@ async function convertVideoToHLS(event, filePath, outputDir) {
 
   const baseName = getBaseNameWithoutExt(filePath);
   const videoOutputDir = path.join(outputDir, baseName);
+
+  // Check if the output folder already exists, and skip conversion if it does
+  if (fs.existsSync(videoOutputDir)) {
+    event.sender.send('conversion-progress', { message: `Skipping ${baseName}: output folder already exists.` });
+    return `Skipped ${baseName} as the output folder already exists.`;
+  }
+
   fs.mkdirSync(videoOutputDir, { recursive: true });
 
   // Get the video resolution and log it
