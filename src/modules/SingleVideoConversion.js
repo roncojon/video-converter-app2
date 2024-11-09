@@ -1,7 +1,14 @@
 // src/components/SingleVideoConversion.js
 import React, { useState, useEffect } from 'react';
 
-function SingleVideoConversion() {
+// type SingleVideoConversionProps = {
+//   cpuSelection: number;
+//   priorityLevel: string;
+// };
+
+function SingleVideoConversion({ cpuSelection, priorityLevel }) {
+  console.log('SingleVideoConversioncpuSelection',cpuSelection)
+  console.log('SingleVideoConversionpriorityLevel', priorityLevel)
   const [filePath, setFilePath] = useState(null);
   const [outputPath, setOutputPath] = useState(null);
   const [output, setOutput] = useState('');
@@ -39,7 +46,9 @@ function SingleVideoConversion() {
     }
 
     try {
-      const result = await window.electronAPI.generateHls(filePath, outputPath);
+      // Pass cpuSelection and priorityLevel to the Electron API
+      console.log('cpuSelectioncpuSelectioncpuSelection',cpuSelection)
+      const result = await window.electronAPI.generateHls(filePath, outputPath, cpuSelection.toString() || '0', priorityLevel || '0');
       setOutput(result);
       setProgress({});
     } catch (error) {

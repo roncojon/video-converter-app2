@@ -2,6 +2,7 @@
 const { ipcMain, dialog } = require('electron');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const { spawn } = require('child_process'); // Use spawn for progress tracking
 const {
   ffmpegPath,
@@ -23,6 +24,11 @@ function setupIpcHandlers() {
     return canceled ? null : filePaths[0];
   });
 
+  // Handler for obtaining the qtty of CPU cores
+  ipcMain.handle('get-cpu-count', async () => {
+    return os.cpus().length;
+  });
+  
   // Handler for selecting a folder
   ipcMain.handle('select-folder', async () => {
     const { canceled, filePaths } = await dialog.showOpenDialog({
@@ -32,12 +38,14 @@ function setupIpcHandlers() {
   });
 
   // Handler for generating HLS for a single file
-  ipcMain.handle('generate-hls', async (event, filePath, outputDir) => {
-    return await convertVideoToHLS(event, filePath, outputDir);
+  ipcMain.handle('generate-hls', async (event, filePath, outputDir, cpuSelection, priorityLevel) => {
+    console.log('generate-hlscpuSelectioncpuSelection:', cpuSelection)
+    console.log('generate-hlspriorityLevelpriorityLevel:', priorityLevel)
+    return await convertVideoToHLS(event, filePath, outputDir, cpuSelection, priorityLevel);
   });
 
   // New handler for generating HLS for all videos in a folder
-  ipcMain.handle('generate-hls-folder', async (event, folderPath, outputDir) => {
+  ipcMain.handle('generate-hls-folder', async (event, folderPath, outputDir, cpuSelection, priorityLevel) => {
     const videoFiles = fs.readdirSync(folderPath).filter(file => path.extname(file).toLowerCase() === '.mp4');
 
     if (videoFiles.length === 0) {
@@ -47,7 +55,7 @@ function setupIpcHandlers() {
     for (const file of videoFiles) {
       const filePath = path.join(folderPath, file);
       try {
-        await convertVideoToHLS(event, filePath, outputDir);
+        await convertVideoToHLS(event, filePath, outputDir, cpuSelection, priorityLevel);
       } catch (error) {
         event.sender.send('conversion-progress', { error: `Failed to convert ${file}: ${error.message}` });
       }
@@ -55,6 +63,7 @@ function setupIpcHandlers() {
 
     return `All videos in ${folderPath} have been converted to HLS.`;
   });
+
 }
 
 // Define log file path
@@ -66,7 +75,10 @@ function logToFile(message) {
 }
 
 // Helper function to convert a video to HLS format and generate thumbnails for .vtt
-async function convertVideoToHLS(event, filePath, outputDir) {
+async function convertVideoToHLS(event, filePath, outputDir, cpuSelection, priorityLevel) {
+  console.log('cpuSelectioncpuSelection:',cpuSelection)
+  console.log('cpuSelectioncpuSelection:',cpuSelection)
+  console.log('priorityLevelpriorityLevel:',priorityLevel)
   const resolutions = [
     { width: 426, height: 240, label: '240p' },
     { width: 640, height: 360, label: '360p' },
@@ -88,6 +100,14 @@ async function convertVideoToHLS(event, filePath, outputDir) {
 
   fs.mkdirSync(videoOutputDir, { recursive: true });
 
+  // Map priority level to Node.js priority values
+  const priorityMapping = {
+    low: 10,      // Low priority
+    normal: 0,    // Normal priority
+    high: -10     // High priority
+  };
+  const priority = priorityMapping[priorityLevel] || 0; // Default to normal if not specified
+
   // Get the video resolution and log it
   const videoResolution = await getVideoResolution(filePath);
   const { width: videoWidth, height: videoHeight } = videoResolution;
@@ -104,18 +124,19 @@ async function convertVideoToHLS(event, filePath, outputDir) {
     : [resolutions[resolutions.length - 1]]; // Default to 4K for high-res videos
 
   console.log("Selected resolutions for conversion:", selectedResolutions);
-  // logToFile(`Selected resolutions for conversion: ${selectedResolutions.map(res => res.label).join(', ')}`);
   const masterPlaylistPath = path.join(videoOutputDir, 'master.m3u8');
   const masterPlaylistLines = ['#EXTM3U'];
 
-  for (const res of applicableResolutions) {
+  for (const res of selectedResolutions) {
     const resOutputDir = path.join(videoOutputDir, res.label);
     fs.mkdirSync(resOutputDir, { recursive: true });
 
+    // Get FFmpeg arguments with selected threads
     const args = getHlsArguments(filePath, videoOutputDir, res.width, res.height, res.label);
-    const ffmpegProcess = spawn(ffmpegPath, args);
-    // const ffmpegProcess = spawn(ffmpegPath, args, { priority: -20 }); // -20 is highest priority in Node.js
-    
+    args.unshift('-threads', cpuSelection); // Add thread count to FFmpeg arguments
+
+    const ffmpegProcess = spawn(ffmpegPath, args, { priority });
+
     ffmpegProcess.stderr.on('data', (data) => {
       const output = data.toString();
       const match = output.match(/frame=\s*(\d+)/);
@@ -172,5 +193,6 @@ async function convertVideoToHLS(event, filePath, outputDir) {
 
   return `Master playlist, VTT file, extra info, and frame images created at ${masterPlaylistPath}`;
 }
+
 
 module.exports = { setupIpcHandlers };

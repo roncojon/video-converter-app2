@@ -1,7 +1,7 @@
 // src/components/FolderVideoConversion.js
 import React, { useState, useEffect } from 'react';
 
-function FolderVideoConversion() {
+function FolderVideoConversion({ cpuSelection, priorityLevel }) {
   const [folderPath, setFolderPath] = useState(null);
   const [outputPath, setOutputPath] = useState(null);
   const [output, setOutput] = useState('');
@@ -38,7 +38,8 @@ function FolderVideoConversion() {
     }
 
     try {
-      const result = await window.electronAPI.generateHlsFolder(folderPath, outputPath);
+      // const result = await window.electronAPI.generateHlsFolder(folderPath, outputPath);
+      const result = await window.electronAPI.generateHls(folderPath, outputPath, cpuSelection, priorityLevel);
       setOutput(result);
       setProgress({});
     } catch (error) {
