@@ -132,8 +132,8 @@ async function convertVideoToHLS(event, filePath, outputDir, cpuSelection, prior
     fs.mkdirSync(resOutputDir, { recursive: true });
 
     // Get FFmpeg arguments with selected threads
-    const args = getHlsArguments(filePath, videoOutputDir, res.width, res.height, res.label);
-    args.unshift('-threads', cpuSelection); // Add thread count to FFmpeg arguments
+    const args = getHlsArguments(filePath, videoOutputDir, res.width, res.height, res.label, cpuSelection);
+    // args.unshift('-threads', cpuSelection); // Add thread count to FFmpeg arguments
 
     const ffmpegProcess = spawn(ffmpegPath, args, { priority });
 

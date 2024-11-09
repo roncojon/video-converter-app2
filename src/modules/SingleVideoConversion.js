@@ -48,7 +48,7 @@ function SingleVideoConversion({ cpuSelection, priorityLevel }) {
     try {
       // Pass cpuSelection and priorityLevel to the Electron API
       console.log('cpuSelectioncpuSelectioncpuSelection',cpuSelection)
-      const result = await window.electronAPI.generateHls(filePath, outputPath, cpuSelection.toString() || '0', priorityLevel || '0');
+      const result = await window.electronAPI.generateHls(filePath, outputPath, cpuSelection.toString() || '0', priorityLevel || 0);
       setOutput(result);
       setProgress({});
     } catch (error) {

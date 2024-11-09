@@ -18,14 +18,14 @@ function getBaseNameWithoutExt(filePath) {
 }
 
 // Function to get HLS arguments for each resolution
-function getHlsArguments(filePath, outputDir, width, height, resolutionLabel) {
+function getHlsArguments(filePath, outputDir, width, height, resolutionLabel, cpuSelection) {
   const outputPattern = path.join(outputDir, resolutionLabel, `${resolutionLabel}_%03d.ts`);
   const m3u8File = path.join(outputDir, resolutionLabel, `${resolutionLabel}.m3u8`);
 
   return [
     '-i', filePath,
     '-vf', `scale=${width}:${height}:force_original_aspect_ratio=decrease,pad=ceil(iw/2)*2:ceil(ih/2)*2`,
-    // '-threads','0',
+    '-threads', cpuSelection ||'0',
     '-c:a', 'aac',                      // Audio codec for HLS compatibility
     '-ar', '32000',                     // Standard audio sample rate          !!RETURN TO 48K later
     '-b:a', '96k',                      // Lower audio bitrate to save bandwidth    !!IMPORTANT RETURN TO 128K later

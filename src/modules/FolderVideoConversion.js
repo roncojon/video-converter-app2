@@ -39,7 +39,7 @@ function FolderVideoConversion({ cpuSelection, priorityLevel }) {
 
     try {
       // const result = await window.electronAPI.generateHlsFolder(folderPath, outputPath);
-      const result = await window.electronAPI.generateHls(folderPath, outputPath, cpuSelection, priorityLevel);
+      const result = await window.electronAPI.generateHlsFolder(folderPath, outputPath, cpuSelection.toString() || '0', priorityLevel || 0);
       setOutput(result);
       setProgress({});
     } catch (error) {
