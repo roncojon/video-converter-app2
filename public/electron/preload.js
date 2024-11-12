@@ -7,5 +7,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   selectFolder: () => ipcRenderer.invoke('select-folder'),
   generateHls: (filePath, outputPath, cpuSelection, priorityLevel) => ipcRenderer.invoke('generate-hls', filePath, outputPath, cpuSelection, priorityLevel),
   generateHlsFolder: (folderPath, outputPath, cpuSelection, priorityLevel) => ipcRenderer.invoke('generate-hls-folder', folderPath, outputPath, cpuSelection, priorityLevel), // Ensure this line is present
-  onProgress: (callback) => ipcRenderer.on('conversion-progress', callback),
+  // onProgress: (callback) => ipcRenderer.on('conversion-progress', callback),
+  onProgressSingle: (callback) => ipcRenderer.on('conversion-progress', callback),
+  onProgressFolder: (callback) => ipcRenderer.on('conversion-progress-folder', callback),
 });

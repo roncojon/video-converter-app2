@@ -1,49 +1,67 @@
 // src/modules/FolderVideoConversion.js
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useContext } from 'react';
+import { SettingsContext } from '../context/SettingsContext';
 
-function FolderVideoConversion({ cpuSelection, priorityLevel }) {
-  const [folderPath, setFolderPath] = useState(null);
-  const [outputPath, setOutputPath] = useState(null);
-  const [output, setOutput] = useState('');
-  const [progress, setProgress] = useState({});
+function FolderVideoConversion() {
+  const {
+    generalSettings,
+    folderSettings,
+    setFolderSettings,
+  } = useContext(SettingsContext);
 
-  useEffect(() => {
-    window.electronAPI.onProgress((event, progressData) => {
-      setProgress((prevProgress) => ({
-        ...prevProgress,
-        [progressData.resolution]: progressData.frameCount,
-      }));
-    });
-  }, []);
+  console.log('HEREEEEEEEE')
+
+  const { selectedFolder, outputFolder, outputTextArray, progress } = folderSettings;
 
   const handleSelectFolder = async () => {
+    setFolderSettings({
+      progress: {},
+      selectedFolder: null,
+      outputFolder: null,
+      outputTextArray: null
+    });
     const selectedFolderPath = await window.electronAPI.selectFolder();
-    setFolderPath(selectedFolderPath);
-
-    // Set the output folder to the selected folder by default if not already set
-    if (!outputPath) {
-      setOutputPath(selectedFolderPath);
-    }
+    setFolderSettings((prevSettings) => ({
+      ...prevSettings,
+      selectedFolder: selectedFolderPath,
+      outputFolder: prevSettings.outputFolder || selectedFolderPath,
+    }));
   };
 
   const handleSelectOutputFolder = async () => {
     const selectedOutputPath = await window.electronAPI.selectFolder();
-    setOutputPath(selectedOutputPath);
+    setFolderSettings((prevSettings) => ({
+      ...prevSettings,
+      outputFolder: selectedOutputPath,
+    }));
   };
 
   const handleConvertFolderToHLS = async () => {
-    if (!folderPath || !outputPath) {
-      setOutput("Please select both a folder with videos and an output folder.");
+    if (!selectedFolder || !outputFolder) {
+      setFolderSettings((prevSettings) => ({
+        ...prevSettings,
+        outputTextArray: "Please select both a folder with videos and an output folder.",
+      }));
       return;
     }
 
     try {
-      // const result = await window.electronAPI.generateHlsFolder(folderPath, outputPath);
-      const result = await window.electronAPI.generateHlsFolder(folderPath, outputPath, cpuSelection.toString() || '0', priorityLevel || 0);
-      setOutput(result);
-      setProgress({});
+      const result = await window.electronAPI.generateHlsFolder(
+        selectedFolder,
+        outputFolder,
+        generalSettings.cpuSelection.toString() || '0',
+        generalSettings.priorityLevel || 'normal'
+      );
+      setFolderSettings((prevSettings) => ({
+        ...prevSettings,
+        outputTextArray: result,
+        progress: {},
+      }));
     } catch (error) {
-      setOutput(`Error: ${error.message}`);
+      setFolderSettings((prevSettings) => ({
+        ...prevSettings,
+        outputTextArray: `Error: ${error.message}`,
+      }));
     }
   };
 
@@ -54,7 +72,7 @@ function FolderVideoConversion({ cpuSelection, priorityLevel }) {
           Choose Folder with Videos
         </button>
         <p className="text-sm text-gray-600 overflow-auto">
-          <span className="font-semibold">Selected folder:</span> {folderPath || "None"}
+          <span className="font-semibold">Selected folder:</span> {selectedFolder || "None"}
         </p>
       </div>
 
@@ -63,7 +81,7 @@ function FolderVideoConversion({ cpuSelection, priorityLevel }) {
           Choose Output Folder
         </button>
         <p className="text-sm text-gray-600 overflow-auto">
-          <span className="font-semibold">Output folder:</span> {outputPath || "None"}
+          <span className="font-semibold">Output folder:</span> {outputFolder || "None"}
         </p>
       </div>
 
@@ -73,9 +91,9 @@ function FolderVideoConversion({ cpuSelection, priorityLevel }) {
         </button>
       </div>
 
-      {output && (
+      {outputTextArray && (
         <div className="alert alert-info mt-4 overflow-auto">
-          <span className="text-sm">{output}</span>
+          <span className="text-sm">{outputTextArray}</span>
         </div>
       )}
 

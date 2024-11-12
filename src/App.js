@@ -1,24 +1,52 @@
 // src/App.js
-import React, { useState } from 'react';
+import React, { useContext, useEffect } from 'react';
 import SingleVideoConversion from './modules/SingleVideoConversion';
 import FolderVideoConversion from './modules/FolderVideoConversion';
 import PrioritySettings from './modules/PrioritySettings';
 import CpuSettings from './modules/CpuSettings';
+import { SettingsContext } from './context/SettingsContext';
 
 function App() {
-  const [activeTab, setActiveTab] = useState("single");
-  const [cpuSelection, setCpuSelection] = useState(0);
-  const [priorityLevel, setPriorityLevel] = useState("normal");
+  const {
+    activeTab,
+    setActiveTab,
+    singleSettings,
+    setSingleSettings,
+    folderSettings,
+    setFolderSettings
+  } = useContext(SettingsContext);
 
-  const handleCpuSelection = (count) => {
-    setCpuSelection(count);
-    console.log('AppcpuSelection',count)
-  };
+  // Handle progress updates from Electron
+  useEffect(() => {
+    const handleProgressSingle = (event, progressData) => {
+      setSingleSettings((prevSettings) => ({
+        ...prevSettings,
+        progress: {
+          ...prevSettings.progress,
+          [progressData.resolution]: progressData.frameCount,
+        },
+      }));
+    };
 
-  const handlePriorityChange = (priority) => {
-    setPriorityLevel(priority);
-    console.log('ApppriorityLevel',priority)
-  };
+    const handleProgressFolder = (event, progressData) => {
+      setFolderSettings((prevSettings) => ({
+        ...prevSettings,
+        progress: {
+          ...prevSettings.progress,
+          [progressData.resolution]: progressData.frameCount,
+        },
+      }));
+    };
+    // Listen to progress updates
+    window.electronAPI.onProgressSingle(handleProgressSingle);
+    window.electronAPI.onProgressFolder(handleProgressFolder);
+  }, []);
+
+  const isConvertingSingleVideo = Object.keys(singleSettings.progress).length > 0;
+  const isConvertingFolder = Object.keys(folderSettings.progress).length > 0;
+
+  // Disable the tab switch if any conversion is in progress
+  const disableTabs = isConvertingSingleVideo || isConvertingFolder;
 
   return (
     <div className="min-h-screen bg-base-200 flex justify-center">
@@ -27,22 +55,24 @@ function App() {
           <h1 className="card-title text-3xl font-bold text-center mb-6">Video Converter</h1>
 
           {/* CPU and Priority Settings */}
-          <CpuSettings onCpuSelection={handleCpuSelection} />
-          <PrioritySettings onPriorityChange={handlePriorityChange} />
+          <CpuSettings disabled={disableTabs}/>
+          <PrioritySettings disabled={disableTabs}/>
 
           {/* Tabs */}
           <div role="tablist" className="tabs tabs-lifted">
             <a
               role="tab"
-              className={`tab ${activeTab === "single" ? "tab-active" : ""}`}
-              onClick={() => setActiveTab("single")}
+              className={`tab ${activeTab === "single" ? "tab-active" : ""} ${disableTabs && activeTab !== "single" ? "tab-disabled" : ""}`}
+              onClick={() => !disableTabs && setActiveTab("single")}
+              style={{ pointerEvents: disableTabs && activeTab !== "single" ? "none" : "auto" }}
             >
               Convert Single Video
             </a>
             <a
               role="tab"
-              className={`tab ${activeTab === "folder" ? "tab-active" : ""}`}
-              onClick={() => setActiveTab("folder")}
+              className={`tab ${activeTab === "folder" ? "tab-active" : ""} ${disableTabs && activeTab !== "folder" ? "tab-disabled" : ""}`}
+              onClick={() => !disableTabs && setActiveTab("folder")}
+              style={{ pointerEvents: disableTabs && activeTab !== "folder" ? "none" : "auto" }}
             >
               Convert All Videos from Folder
             </a>
@@ -51,9 +81,9 @@ function App() {
           {/* Tab Content */}
           <div className="mt-4">
             {activeTab === "single" ? (
-              <SingleVideoConversion cpuSelection={cpuSelection} priorityLevel={priorityLevel} />
+              <SingleVideoConversion />
             ) : (
-              <FolderVideoConversion cpuSelection={cpuSelection} priorityLevel={priorityLevel} />
+              <FolderVideoConversion />
             )}
           </div>
         </div>

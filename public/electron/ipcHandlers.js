@@ -42,7 +42,8 @@ function setupIpcHandlers() {
   ipcMain.handle('generate-hls', async (event, filePath, outputDir, cpuSelection, priorityLevel) => {
     console.log('generate-hlscpuSelectioncpuSelection:', cpuSelection)
     console.log('generate-hlspriorityLevelpriorityLevel:', priorityLevel)
-    return await convertVideoToHLS(event, filePath, outputDir, cpuSelection, priorityLevel);
+    const isConvertingFolder = false;
+    return await convertVideoToHLS(event, filePath, outputDir, cpuSelection, priorityLevel, isConvertingFolder);
   });
 
   // New handler for generating HLS for all videos in a folder
@@ -56,9 +57,10 @@ function setupIpcHandlers() {
     for (const file of videoFiles) {
       const filePath = path.join(folderPath, file);
       try {
-        await convertVideoToHLS(event, filePath, outputDir, cpuSelection, priorityLevel);
+        const isConvertingFolder = true;
+        await convertVideoToHLS(event, filePath, outputDir, cpuSelection, priorityLevel, isConvertingFolder);
       } catch (error) {
-        event.sender.send('conversion-progress', { error: `Failed to convert ${file}: ${error.message}` });
+        event.sender.send(conversionProgress, { error: `Failed to convert ${file}: ${error.message}` });
       }
     }
 
@@ -86,7 +88,8 @@ function logToFile(message) {
 }
 
 // Helper function to convert a video to HLS format and generate thumbnails for .vtt
-async function convertVideoToHLS(event, filePath, outputDir, cpuSelection, priorityLevel) {
+async function convertVideoToHLS(event, filePath, outputDir, cpuSelection, priorityLevel, isConvertingFolder) {
+  const conversionProgress = isConvertingFolder ? "conversion-progress-folder": "conversion-progress";
   console.log('cpuSelectioncpuSelection:', cpuSelection)
   console.log('cpuSelectioncpuSelection:', cpuSelection)
   console.log('priorityLevelpriorityLevel:', priorityLevel)
@@ -105,7 +108,7 @@ async function convertVideoToHLS(event, filePath, outputDir, cpuSelection, prior
 
   // Check if the output folder already exists, and skip conversion if it does
   if (fs.existsSync(videoOutputDir)) {
-    event.sender.send('conversion-progress', { message: `Skipping ${baseName}: output folder already exists.` });
+    event.sender.send(conversionProgress, { message: `Skipping ${baseName}: output folder already exists.` });
     return `Skipped ${baseName} as the output folder already exists.`;
   }
 
@@ -160,7 +163,7 @@ async function convertVideoToHLS(event, filePath, outputDir, cpuSelection, prior
       const match = output.match(/frame=\s*(\d+)/);
       if (match) {
         const frameCount = parseInt(match[1], 10);
-        event.sender.send('conversion-progress', { resolution: res.label, frameCount });
+        event.sender.send(conversionProgress, { resolution: res.label, frameCount });
       }
     });
 

@@ -1,9 +1,14 @@
 // src/modules/CpuSettings.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { SettingsContext } from '../context/SettingsContext';
 
-function CpuSettings({ onCpuSelection }) {
+function CpuSettings({disabled}) {
+    const {
+        generalSettings, 
+        setGeneralSettings,
+      } = useContext(SettingsContext);
+
     const [cpuCount, setCpuCount] = useState(0);
-    const [selectedCpus, setSelectedCpus] = useState(0);
 
     useEffect(() => {
         // Fetch the number of available CPUs from the Electron backend
@@ -12,29 +17,29 @@ function CpuSettings({ onCpuSelection }) {
                 const count = await window.electronAPI.getCpuCount();
                 console.log('CpuSettingsCount:', count);
                 setCpuCount(count);
-                setSelectedCpus(count); // Default to all CPUs
-                onCpuSelection(count); // Notify parent of the initial selection
+                setGeneralSettings({ ...generalSettings, cpuSelection: count });
             } catch (error) {
                 console.log('CpuSettingsError:', error)
             }
 
         };
-
         fetchCpuCount();
     }, []);
 
     const handleCpuChange = (event) => {
         const value = parseInt(event.target.value, 10);
-        setSelectedCpus(value);
-        onCpuSelection(value); // Notify parent of the selection change
+        // setSelectedCpus(value);
+        setGeneralSettings({ ...generalSettings, cpuSelection: value });
     };
+
+    const selectedCpus = generalSettings.cpuSelection;
 
     return (
         <div className="form-control mb-4">
             <label className="label">
                 <span className="label-text">Select Number of CPUs to Use:</span>
             </label>
-            <select value={selectedCpus} onChange={handleCpuChange} className="select select-bordered w-full">
+            <select value={selectedCpus} onChange={handleCpuChange} className="select select-bordered w-full" disabled={disabled}>
                 {[...Array(cpuCount).keys()].map(i => (
                     <option key={i + 1} value={i + 1}>
                         {i + 1} CPU{i + 1 > 1 ? 's' : ''}

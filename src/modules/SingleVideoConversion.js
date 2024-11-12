@@ -1,58 +1,67 @@
 // src/modules/SingleVideoConversion.js
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useContext } from 'react';
+import { SettingsContext } from '../context/SettingsContext';
 
-// type SingleVideoConversionProps = {
-//   cpuSelection: number;
-//   priorityLevel: string;
-// };
+function SingleVideoConversion() {
+  const {
+    generalSettings,
+    singleSettings,
+    setSingleSettings,
+  } = useContext(SettingsContext);
 
-function SingleVideoConversion({ cpuSelection, priorityLevel }) {
-  console.log('SingleVideoConversioncpuSelection',cpuSelection)
-  console.log('SingleVideoConversionpriorityLevel', priorityLevel)
-  const [filePath, setFilePath] = useState(null);
-  const [outputPath, setOutputPath] = useState(null);
-  const [output, setOutput] = useState('');
-  const [progress, setProgress] = useState({});
-
-  useEffect(() => {
-    window.electronAPI.onProgress((event, progressData) => {
-      setProgress((prevProgress) => ({
-        ...prevProgress,
-        [progressData.resolution]: progressData.frameCount,
-      }));
-    });
-  }, []);
+  const { selectedFile, outputFolder, outputText, progress } = singleSettings;
 
   const handleSelectFile = async () => {
+    setSingleSettings({
+      progress: {},
+      selectedFile: null,
+      outputFolder: null,
+      outputText: null
+    });
     const selectedFilePath = await window.electronAPI.selectFile();
-    setFilePath(selectedFilePath);
-
-    // Extract the directory path from the selected file path
-    if (selectedFilePath) {
-      const directoryPath = selectedFilePath.substring(0, selectedFilePath.lastIndexOf('/')) || selectedFilePath.substring(0, selectedFilePath.lastIndexOf('\\'));
-      setOutputPath(directoryPath);
-    }
+    setSingleSettings((prevSettings) => ({
+      ...prevSettings,
+      selectedFile: selectedFilePath,
+      outputFolder: prevSettings.outputFolder ||
+        selectedFilePath?.substring(0, selectedFilePath?.lastIndexOf('/')) ||
+        selectedFilePath?.substring(0, selectedFilePath?.lastIndexOf('\\')),
+    }));
   };
 
   const handleSelectFolder = async () => {
     const selectedFolderPath = await window.electronAPI.selectFolder();
-    setOutputPath(selectedFolderPath);
+    setSingleSettings((prevSettings) => ({
+      ...prevSettings,
+      outputFolder: selectedFolderPath,
+    }));
   };
 
   const handleConvertToHLS = async () => {
-    if (!filePath || !outputPath) {
-      setOutput("Please select a file and output folder.");
+    if (!selectedFile || !outputFolder) {
+      setSingleSettings((prevSettings) => ({
+        ...prevSettings,
+        outputText: "Please select a file and output folder.",
+      }));
       return;
     }
 
     try {
-      // Pass cpuSelection and priorityLevel to the Electron API
-      console.log('cpuSelectioncpuSelectioncpuSelection',cpuSelection)
-      const result = await window.electronAPI.generateHls(filePath, outputPath, cpuSelection.toString() || '0', priorityLevel || 0);
-      setOutput(result);
-      setProgress({});
+      const result = await window.electronAPI.generateHls(
+        selectedFile,
+        outputFolder,
+        generalSettings.cpuSelection.toString() || '0',
+        generalSettings.priorityLevel || 'normal'
+      );
+      setSingleSettings((prevSettings) => ({
+        ...prevSettings,
+        outputText: result,
+        progress: {}, // Reset progress after conversion completes
+      }));
     } catch (error) {
-      setOutput(`Error: ${error.message}`);
+      setSingleSettings((prevSettings) => ({
+        ...prevSettings,
+        outputText: `Error: ${error.message}`,
+      }));
     }
   };
 
@@ -63,7 +72,7 @@ function SingleVideoConversion({ cpuSelection, priorityLevel }) {
           Choose File
         </button>
         <p className="text-sm text-gray-600 overflow-auto">
-          <span className="font-semibold">Selected file:</span> {filePath || "None"}
+          <span className="font-semibold">Selected file:</span> {selectedFile || "None"}
         </p>
       </div>
 
@@ -72,7 +81,7 @@ function SingleVideoConversion({ cpuSelection, priorityLevel }) {
           Choose Output Folder
         </button>
         <p className="text-sm text-gray-600 overflow-auto">
-          <span className="font-semibold">Output folder:</span> {outputPath || "None"}
+          <span className="font-semibold">Output folder:</span> {outputFolder || "None"}
         </p>
       </div>
 
@@ -82,9 +91,9 @@ function SingleVideoConversion({ cpuSelection, priorityLevel }) {
         </button>
       </div>
 
-      {output && (
+      {outputText && (
         <div className="alert alert-info mt-4 overflow-auto">
-          <span className="text-sm">{output}</span>
+          <span className="text-sm">{outputText}</span>
         </div>
       )}
 

@@ -1,21 +1,26 @@
 // src/modules/PrioritySettings.js
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
+import { SettingsContext } from '../context/SettingsContext';
 
-function PrioritySettings({ onPriorityChange }) {
-  const [selectedPriority, setSelectedPriority] = useState('normal');
+function PrioritySettings({disabled}) {
+  const {
+    generalSettings, 
+    setGeneralSettings,
+  } = useContext(SettingsContext);
 
   const handlePriorityChange = (event) => {
     const priority = event.target.value;
-    setSelectedPriority(priority);
-    onPriorityChange(priority); // Notify parent component of the priority selection
+    setGeneralSettings({ ...generalSettings, priorityLevel: priority });
   };
+
+  const selectedPriority = generalSettings.priorityLevel;
 
   return (
     <div className="form-control mb-4">
       <label className="label">
         <span className="label-text">Select Process Priority:</span>
       </label>
-      <select value={selectedPriority} onChange={handlePriorityChange} className="select select-bordered w-full">
+      <select value={selectedPriority} onChange={handlePriorityChange} className="select select-bordered w-full" disabled={disabled}>
         <option value="low">Low</option>
         <option value="normal">Normal</option>
         <option value="high">High</option>
