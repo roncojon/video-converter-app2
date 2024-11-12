@@ -1,0 +1,2 @@
+2024-11-11T05:37:05.206Z - Error generating preview video: generatePreviewVideo is not a function
+2024-11-11T05:55:44.015Z - Error generating preview video: durationArgs is not defined

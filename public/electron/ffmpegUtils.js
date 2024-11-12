@@ -32,7 +32,7 @@ function getHlsArguments(filePath, outputDir, width, height, resolutionLabel, cp
     '-c:v', 'libx264',                  // Video codec optimized for HLS compatibility  
     '-profile:v', 'main',               // Suitable for compatibility with most devices
     '-preset', 'verySlow',                  // Fast encoding preset for speed over compression   !!IMPORTANT
-    '-crf', '22',                       // Slightly lower quality factor for faster encoding
+    '-crf', '23',                       // Higher values till 28 will reduce file size while losing a bit of quality, and the opposite till 18
     '-sc_threshold', '0',               // Forces keyframes at scene changes only
     '-g', '48',                         // GOP size matching twice the frame rate (for 24fps video)
     '-keyint_min', '48',                // Minimum interval between keyframes
@@ -260,6 +260,59 @@ async function generateThumbnails(filePath, outputDir) {
   ]);
 }
 
+// Function to generate a preview video
+function generatePreviewVideo(filePath, outputDir, previewDuration, startPercentage = 40) {
+  // Create the preview output directory if it doesn't exist
+  const previewDir = path.join(outputDir, 'preview');
+  fs.mkdirSync(previewDir, { recursive: true });
+
+  const previewFilePath = path.join(previewDir, 'preview.mp4');
+
+  return new Promise((resolve, reject) => {
+    // First, get the original video duration using FFprobe
+    const durationArgs = [
+      '-v', 'error',
+      '-select_streams', 'v:0',
+      '-show_entries', 'format=duration',
+      '-of', 'default=noprint_wrappers=1:nokey=1',
+      filePath
+    ];
+
+    execFile(ffprobePath, durationArgs, (durationError, durationStdout) => {
+      if (durationError) {
+        reject(new Error(`Failed to retrieve video duration: ${durationError.message}`));
+        return;
+      }
+
+      const duration = parseFloat(durationStdout.trim());
+      const startTime = Math.floor(duration * (startPercentage / 100)); // Calculate start time based on the percentage
+
+      const args = [
+        '-ss', startTime,                 // Start time calculated from percentage of video duration
+        '-i', filePath,                   // Input file
+        '-t', previewDuration,            // Duration of the preview in seconds
+        '-vf', 'scale=\'if(gt(a,1),-2,480)\':\'if(gt(a,1),480,-2)\'', // Dynamic scaling to handle both landscape and portrait
+        '-an',                            // Remove audio
+        '-c:v', 'libx264',                // Video codec optimized for HLS compatibility
+        '-preset', 'verySlow',            // Slower preset for higher compression without quality loss
+        '-crf', '22',                     // Higher values till 28 will reduce file size while losing a bit of quality, and the opposite till 18
+        '-movflags', 'faststart',         // Allows playback to start faster
+        previewFilePath                   // Output file path
+      ];
+
+      // Run FFmpeg with the arguments
+      execFile(ffmpegPath, args, (error) => {
+        if (error) {
+          reject(new Error(`Failed to create preview video: ${error.message}`));
+        } else {
+          resolve(previewFilePath);
+        }
+      });
+    });
+  });
+}
+
+
 module.exports = {
   ffmpegPath,
   saveExtraInfo,
@@ -267,6 +320,7 @@ module.exports = {
   getHlsArguments,
   getVideoResolution,
   generateFrameImages,
-  generateThumbnails // Export the new function
+  generateThumbnails, // Export the new function
+  generatePreviewVideo 
 };
 

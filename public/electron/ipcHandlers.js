@@ -11,7 +11,8 @@ const {
   getHlsArguments,
   getVideoResolution,
   generateThumbnails, // Import the generateThumbnails function from ffmpegUtils.js
-  generateFrameImages
+  generateFrameImages,
+  generatePreviewVideo // Import the generatePreviewVideo function
 } = require('./ffmpegUtils');
 
 function setupIpcHandlers() {
@@ -65,6 +66,16 @@ function setupIpcHandlers() {
   });
 
 }
+
+// // New handler for generating a preview video
+// ipcMain.handle('generate-preview-video', async (event, filePath, outputDir, previewDuration) => {
+//   try {
+//     const previewPath = await generatePreviewVideo(filePath, outputDir, previewDuration);
+//     return `Preview video created at ${previewPath}`;
+//   } catch (error) {
+//     return `Error generating preview video: ${error.message}`;
+//   }
+// });
 
 // Define log file path
 const logFilePath = path.join(__dirname, 'conversion_logs.txt');
@@ -198,7 +209,19 @@ async function convertVideoToHLS(event, filePath, outputDir, cpuSelection, prior
     logToFile(`Error generating frame images: ${error.message}`);
   }
 
-  return `Master playlist, VTT file, extra info, and frame images created at ${masterPlaylistPath}`;
+    // Generate Preview Video
+    try {
+      const previewDuration = 5; // You can customize the preview duration or pass it as a parameter
+      const startTimePercent = 40; // You can customize the preview duration or pass it as a parameter
+      
+      const previewPath = await generatePreviewVideo(filePath, videoOutputDir, previewDuration, startTimePercent);
+      event.sender.send('preview-video-progress', { message: `Preview video created: ${previewPath}` });
+    } catch (error) {
+      console.error("Error generating preview video:", error);
+      logToFile(`Error generating preview video: ${error.message}`);
+    }
+
+  return `Master playlist, preview, VTT file, extra info, and frame images created at ${masterPlaylistPath}`;
 }
 
 

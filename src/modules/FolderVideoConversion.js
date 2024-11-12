@@ -1,4 +1,4 @@
-// src/components/FolderVideoConversion.js
+// src/modules/FolderVideoConversion.js
 import React, { useState, useEffect } from 'react';
 
 function FolderVideoConversion({ cpuSelection, priorityLevel }) {
