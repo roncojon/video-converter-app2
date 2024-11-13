@@ -42,6 +42,7 @@ function App() {
     window.electronAPI.onProgressFolder(handleProgressFolder);
   }, []);
 
+  // Handle disable
   const isConvertingSingleVideo = Object.keys(singleSettings.progress).length > 0;
   const isConvertingFolder = Object.keys(folderSettings.progress).length > 0;
 
@@ -81,9 +82,9 @@ function App() {
           {/* Tab Content */}
           <div className="mt-4">
             {activeTab === "single" ? (
-              <SingleVideoConversion />
+              <SingleVideoConversion disabled={disableTabs}/>
             ) : (
-              <FolderVideoConversion />
+              <FolderVideoConversion disabled={disableTabs}/>
             )}
           </div>
         </div>

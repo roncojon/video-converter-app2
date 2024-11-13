@@ -2,7 +2,7 @@
 import React, { useEffect, useContext } from 'react';
 import { SettingsContext } from '../context/SettingsContext';
 
-function FolderVideoConversion() {
+function FolderVideoConversion({disabled}) {
   const {
     generalSettings,
     folderSettings,
@@ -68,7 +68,7 @@ function FolderVideoConversion() {
   return (
     <div>
       <div className="form-control mb-4">
-        <button onClick={handleSelectFolder} className="btn btn-primary w-full mb-2">
+        <button onClick={handleSelectFolder} className="btn btn-primary w-full mb-2" disabled={disabled}>
           Choose Folder with Videos
         </button>
         <p className="text-sm text-gray-600 overflow-auto">
@@ -77,7 +77,7 @@ function FolderVideoConversion() {
       </div>
 
       <div className="form-control mb-4">
-        <button onClick={handleSelectOutputFolder} className="btn btn-secondary w-full mb-2">
+        <button onClick={handleSelectOutputFolder} className="btn btn-secondary w-full mb-2" disabled={disabled}>
           Choose Output Folder
         </button>
         <p className="text-sm text-gray-600 overflow-auto">
@@ -86,7 +86,7 @@ function FolderVideoConversion() {
       </div>
 
       <div className="form-control mb-4">
-        <button onClick={handleConvertFolderToHLS} className="btn btn-accent w-full">
+        <button onClick={handleConvertFolderToHLS} className="btn btn-accent w-full" disabled={disabled}>
           Convert All Videos to HLS
         </button>
       </div>

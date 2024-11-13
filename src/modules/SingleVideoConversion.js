@@ -2,12 +2,13 @@
 import React, { useEffect, useContext } from 'react';
 import { SettingsContext } from '../context/SettingsContext';
 
-function SingleVideoConversion() {
+function SingleVideoConversion({disabled}) {
   const {
     generalSettings,
     singleSettings,
     setSingleSettings,
   } = useContext(SettingsContext);
+
 
   const { selectedFile, outputFolder, outputText, progress } = singleSettings;
 
@@ -68,7 +69,7 @@ function SingleVideoConversion() {
   return (
     <div>
       <div className="form-control mb-4">
-        <button onClick={handleSelectFile} className="btn btn-primary w-full mb-2">
+        <button onClick={handleSelectFile} className="btn btn-primary w-full mb-2" disabled={disabled}>
           Choose File
         </button>
         <p className="text-sm text-gray-600 overflow-auto">
@@ -77,7 +78,7 @@ function SingleVideoConversion() {
       </div>
 
       <div className="form-control mb-4">
-        <button onClick={handleSelectFolder} className="btn btn-secondary w-full mb-2">
+        <button onClick={handleSelectFolder} className="btn btn-secondary w-full mb-2" disabled={disabled}>
           Choose Output Folder
         </button>
         <p className="text-sm text-gray-600 overflow-auto">
@@ -86,7 +87,7 @@ function SingleVideoConversion() {
       </div>
 
       <div className="form-control mb-4">
-        <button onClick={handleConvertToHLS} className="btn btn-accent w-full">
+        <button onClick={handleConvertToHLS} className="btn btn-accent w-full" disabled={disabled}>
           Convert to HLS
         </button>
       </div>
