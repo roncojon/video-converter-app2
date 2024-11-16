@@ -13,7 +13,7 @@ function App() {
     singleSettings,
     setSingleSettings,
     folderSettings,
-    setFolderSettings
+    setFolderSettings,
   } = useContext(SettingsContext);
 
   // Handle progress updates from Electron
@@ -22,28 +22,26 @@ function App() {
       setSingleSettings((prevSettings) => ({
         ...prevSettings,
         progress: {
-          ...prevSettings.progress,
-          // [progressData.resolution]: progressData.frameCount,
-          videoName: progressData.videoName,
-          resolution: progressData.resolution,
-          // frameCount: progressData.frameCount,
-          percentage: progressData.percentage
+          videoName: progressData.videoName, // Save video name
+          resolution: progressData.resolution, // Current resolution being converted
+          percentage: progressData.percentage, // Overall percentage
         },
       }));
     };
 
     const handleProgressFolder = (event, progressData) => {
-      const { videoName, resolution, frameCount, percentage } = progressData;
+      const { videoName, percentage, resolution } = progressData;
 
       setFolderSettings((prevSettings) => {
-        const videoProgress = prevSettings.progress[videoName] || {};
-        videoProgress[resolution] = { frameCount, percentage };
-
         return {
           ...prevSettings,
           progress: {
             ...prevSettings.progress,
-            [videoName]: videoProgress,
+            [videoName]: {
+              ...prevSettings.progress[videoName], // Keep existing progress for this video
+              percentage, // Update overall percentage
+              resolution, // Update current resolution
+            },
           },
         };
       });
@@ -58,12 +56,13 @@ function App() {
     //   window.electronAPI.removeListener('conversion-progress', handleProgressSingle);
     //   window.electronAPI.removeListener('conversion-progress-folder', handleProgressFolder);
     // };
-  }, [/* setSingleSettings, setFolderSettings */]);
+  }, [setSingleSettings, setFolderSettings]);
 
   // Handle disable
-  const isConvertingSingleVideo = Object.keys(singleSettings.progress).length > 0;
-  const isConvertingFolder = Object.keys(folderSettings.progress).length > 0;
-
+  // const isConvertingSingleVideo = Object.keys(singleSettings.progress).length > 0;
+  // const isConvertingFolder = Object.keys(folderSettings.progress).length > 0;
+  const isConvertingSingleVideo = singleSettings?.converting;
+  const isConvertingFolder = folderSettings?.converting;
   // Disable the tab switch if any conversion is in progress
   const disableTabs = isConvertingSingleVideo || isConvertingFolder;
 
@@ -81,7 +80,9 @@ function App() {
           <div role="tablist" className="tabs tabs-lifted">
             <a
               role="tab"
-              className={`tab ${activeTab === "single" ? "tab-active" : ""} ${disableTabs && activeTab !== "single" ? "tab-disabled" : ""}`}
+              className={`tab ${activeTab === "single" ? "tab-active" : ""} ${
+                disableTabs && activeTab !== "single" ? "tab-disabled" : ""
+              }`}
               onClick={() => !disableTabs && setActiveTab("single")}
               style={{ pointerEvents: disableTabs && activeTab !== "single" ? "none" : "auto" }}
             >
@@ -89,7 +90,9 @@ function App() {
             </a>
             <a
               role="tab"
-              className={`tab ${activeTab === "folder" ? "tab-active" : ""} ${disableTabs && activeTab !== "folder" ? "tab-disabled" : ""}`}
+              className={`tab ${activeTab === "folder" ? "tab-active" : ""} ${
+                disableTabs && activeTab !== "folder" ? "tab-disabled" : ""
+              }`}
               onClick={() => !disableTabs && setActiveTab("folder")}
               style={{ pointerEvents: disableTabs && activeTab !== "folder" ? "none" : "auto" }}
             >

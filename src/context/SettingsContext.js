@@ -18,6 +18,7 @@ export function SettingsProvider({ children }) {
     selectedFile: null,
     outputFolder: null,
     outputText: null,
+    converting:false
   });
 
   const [folderSettings, setFolderSettings] = useState({
@@ -27,6 +28,7 @@ export function SettingsProvider({ children }) {
     selectedFolder: null,
     outputFolder: null,
     outputTextArray: null,
+    converting:false
   });
 
   return (

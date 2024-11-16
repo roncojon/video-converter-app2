@@ -46,6 +46,10 @@ function SingleVideoConversion({ disabled }) {
     }
 
     try {
+      setSingleSettings((prevSettings) => ({
+        ...prevSettings,
+        converting: true
+      }));
       const result = await window.electronAPI.generateHls(
         selectedFile,
         outputFolder,
@@ -55,11 +59,13 @@ function SingleVideoConversion({ disabled }) {
       setSingleSettings((prevSettings) => ({
         ...prevSettings,
         outputText: result,
-        progress: {}, // Reset progress after conversion completes
+        converting: false
+        // progress: {}, // Reset progress after conversion completes
       }));
     } catch (error) {
       setSingleSettings((prevSettings) => ({
         ...prevSettings,
+        converting: false,
         outputText: `Error: ${error.message}`,
       }));
     }
@@ -67,10 +73,10 @@ function SingleVideoConversion({ disabled }) {
 
   console.log('progressssss', progress)
   console.log('progressssssString', JSON.stringify(progress))
-  // Extract the file name with extension
-  const fileName = selectedFile?.split(/[/\\]/).pop();
-  // Extract the file name without the extension
-  const fileNameWithoutExt = fileName?.slice(0, fileName?.lastIndexOf('.'));
+  // // Extract the file name with extension
+  // const fileName = selectedFile?.split(/[/\\]/).pop();
+  // // Extract the file name without the extension
+  // const fileNameWithoutExt = fileName?.slice(0, fileName?.lastIndexOf('.'));
 
   return (
     <div>
@@ -112,7 +118,7 @@ function SingleVideoConversion({ disabled }) {
         </button>
       </div>
 
-      <h3 className="mt-6 text-base font-semibold">{fileNameWithoutExt ? (fileNameWithoutExt + ":") : ""}</h3>
+      {/* <h3 className="mt-6 text-base font-semibold">{fileNameWithoutExt ? (fileNameWithoutExt + ":") : ""}</h3> */}
 
       {outputText && (
         <div className="alert alert-info mt-4 overflow-auto">
@@ -121,20 +127,24 @@ function SingleVideoConversion({ disabled }) {
       )}
 
       {progress?.percentage !== undefined && (
-        <div className="mt-4">
-          <div className="text-sm mb-2">
-            <span className="font-bold">Overall progress:</span>
-            <span> {progress?.percentage?.toFixed(2)}%</span>
-          </div>
-          <div className="text-sm mb-2">
-            <span className="font-semibold">Current Resolution:</span>{" "}
-            <span>{progress?.resolution || "Unknown"}</span>
-          </div>
-          <progress
-            className="progress progress-primary w-full"
-            value={progress?.percentage}
-            max="100"
-          ></progress>
+        <div className="mt-4 ">
+          <ul className="space-y-6">
+            <li key={progress.videoName} className="text-sm border-b pb-4">
+              <div className="text-sm mb-2">
+                <span className="font-bold">{progress.videoName}:</span>
+                <span> {progress?.percentage?.toFixed(2)}%</span>
+              </div>
+              <div className="text-sm mb-2">
+                <span className="font-semibold">Current Resolution:</span>{" "}
+                <span>{progress?.resolution || "Unknown"}</span>
+              </div>
+              <progress
+                className="progress progress-primary w-full"
+                value={progress?.percentage}
+                max="100"
+              ></progress>
+            </li>
+          </ul>
         </div>
       )}
 
