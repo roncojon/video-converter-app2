@@ -1,3 +1,4 @@
+// public/electron/ipcHandlers.js
 // Import required modules at the top
 const { ipcMain, dialog } = require('electron');
 const fs = require('fs');
@@ -12,7 +13,8 @@ const {
   getVideoResolution,
   generateThumbnails, // Import the generateThumbnails function from ffmpegUtils.js
   generateFrameImages,
-  generatePreviewVideo // Import the generatePreviewVideo function
+  generatePreviewVideo, // Import the generatePreviewVideo function
+  getTotalFrames
 } = require('./ffmpegUtils');
 
 function setupIpcHandlers() {
@@ -89,7 +91,7 @@ function logToFile(message) {
 
 // Helper function to convert a video to HLS format and generate thumbnails for .vtt
 async function convertVideoToHLS(event, filePath, outputDir, cpuSelection, priorityLevel, isConvertingFolder) {
-  const conversionProgress = isConvertingFolder ? "conversion-progress-folder": "conversion-progress";
+  const conversionProgress = isConvertingFolder ? "conversion-progress-folder" : "conversion-progress";
   console.log('cpuSelectioncpuSelection:', cpuSelection)
   console.log('cpuSelectioncpuSelection:', cpuSelection)
   console.log('priorityLevelpriorityLevel:', priorityLevel)
@@ -139,7 +141,13 @@ async function convertVideoToHLS(event, filePath, outputDir, cpuSelection, prior
   const masterPlaylistPath = path.join(videoOutputDir, 'master.m3u8');
   const masterPlaylistLines = ['#EXTM3U'];
 
+  const framesOfSingleResolution = await getTotalFrames(filePath);
+  const totalFrames = framesOfSingleResolution * (selectedResolutions?.length || 0); // Dynamically calculate total frames
+  let processedFrames = -framesOfSingleResolution;
+  console.log('totalFrames', totalFrames)
+
   for (const res of selectedResolutions) {
+    processedFrames += framesOfSingleResolution;
     const resOutputDir = path.join(videoOutputDir, res.label);
     fs.mkdirSync(resOutputDir, { recursive: true });
 
@@ -158,12 +166,28 @@ async function convertVideoToHLS(event, filePath, outputDir, cpuSelection, prior
     // Set priority after the process starts
     setWindowsProcessPriority(ffmpegProcess.pid, priorityValue);
 
+    // ffmpegProcess.stderr.on('data', (data) => {
+    //   const output = data.toString();
+    //   const match = output.match(/frame=\s*(\d+)/);
+    //   if (match) {
+    //     const frameCount = parseInt(match[1], 10);
+    //     event.sender.send(conversionProgress, { resolution: res.label, frameCount });
+    //   }
+    // });
+
+    console.log('totalFrames', totalFrames)
     ffmpegProcess.stderr.on('data', (data) => {
       const output = data.toString();
-      const match = output.match(/frame=\s*(\d+)/);
+      const match = output.match(/frame=\s*(\d+)/); // Extract frame count
       if (match) {
         const frameCount = parseInt(match[1], 10);
-        event.sender.send(conversionProgress, { resolution: res.label, frameCount });
+        const percentage = Math.min((((processedFrames + frameCount) / totalFrames) * 100).toFixed(2), 100); // Calculate completion percentage
+        event.sender.send(conversionProgress, {
+          videoName: path.basename(filePath), // Include the video name
+          resolution: res.label,
+          frameCount,
+          percentage,
+        });
       }
     });
 
@@ -212,17 +236,17 @@ async function convertVideoToHLS(event, filePath, outputDir, cpuSelection, prior
     logToFile(`Error generating frame images: ${error.message}`);
   }
 
-    // Generate Preview Video
-    try {
-      const previewDuration = 5; // You can customize the preview duration or pass it as a parameter
-      const startTimePercent = 40; // You can customize the preview duration or pass it as a parameter
-      
-      const previewPath = await generatePreviewVideo(filePath, videoOutputDir, previewDuration, startTimePercent);
-      event.sender.send('preview-video-progress', { message: `Preview video created: ${previewPath}` });
-    } catch (error) {
-      console.error("Error generating preview video:", error);
-      logToFile(`Error generating preview video: ${error.message}`);
-    }
+  // Generate Preview Video
+  try {
+    const previewDuration = 5; // You can customize the preview duration or pass it as a parameter
+    const startTimePercent = 40; // You can customize the preview duration or pass it as a parameter
+
+    const previewPath = await generatePreviewVideo(filePath, videoOutputDir, previewDuration, startTimePercent);
+    event.sender.send('preview-video-progress', { message: `Preview video created: ${previewPath}` });
+  } catch (error) {
+    console.error("Error generating preview video:", error);
+    logToFile(`Error generating preview video: ${error.message}`);
+  }
 
   return `Master playlist, preview, VTT file, extra info, and frame images created at ${masterPlaylistPath}`;
 }

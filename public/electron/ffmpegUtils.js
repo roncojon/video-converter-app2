@@ -1,7 +1,7 @@
 // public/electron/ffmpegUtils.js
 
 const path = require('path');
-const { execFile } = require('child_process');
+const { execFile, execSync } = require('child_process');
 const fs = require('fs');
 const { app } = require('electron');
 
@@ -16,6 +16,39 @@ const ffprobePath = app.isPackaged
 function getBaseNameWithoutExt(filePath) {
   return path.basename(filePath, path.extname(filePath));
 }
+
+async function getTotalFrames(filePath) {
+  try {
+    // Run FFprobe to get video metadata
+    const metadata = execSync(
+      `"${ffprobePath}" -v error -select_streams v:0 -show_entries stream=duration,r_frame_rate -of csv=p=0 "${filePath}"`
+    ).toString();
+
+    console.log('FFprobe Output:', metadata); // Debugging: Check what FFprobe returns
+
+    // Adjust parsing order based on the FFprobe output
+    const [rFrameRate, duration] = metadata.trim().split(',');
+    if (!duration || !rFrameRate) {
+      throw new Error('Missing duration or frame rate in FFprobe output');
+    }
+
+    const [numerator, denominator] = rFrameRate.split('/').map(Number); // Parse frame rate
+    if (!numerator || !denominator) {
+      throw new Error('Invalid frame rate format');
+    }
+
+    const frameRate = numerator / denominator; // Calculate frame rate
+    const totalFrames = Math.floor(parseFloat(duration) * frameRate); // Calculate total frames
+
+    console.log(`Duration: ${duration}, Frame Rate: ${frameRate}, Total Frames: ${totalFrames}`);
+    return totalFrames;
+  } catch (error) {
+    console.error('Error calculating total frames:', error.message);
+    throw new Error('Failed to calculate total frames.');
+  }
+}
+
+
 
 // Function to get HLS arguments for each resolution
 function getHlsArguments(filePath, outputDir, width, height, resolutionLabel, cpuSelection) {
@@ -321,6 +354,7 @@ module.exports = {
   getVideoResolution,
   generateFrameImages,
   generateThumbnails, // Export the new function
-  generatePreviewVideo 
+  generatePreviewVideo,
+  getTotalFrames 
 };
 

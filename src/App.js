@@ -23,24 +23,42 @@ function App() {
         ...prevSettings,
         progress: {
           ...prevSettings.progress,
-          [progressData.resolution]: progressData.frameCount,
+          // [progressData.resolution]: progressData.frameCount,
+          videoName: progressData.videoName,
+          resolution: progressData.resolution,
+          // frameCount: progressData.frameCount,
+          percentage: progressData.percentage
         },
       }));
     };
 
     const handleProgressFolder = (event, progressData) => {
-      setFolderSettings((prevSettings) => ({
-        ...prevSettings,
-        progress: {
-          ...prevSettings.progress,
-          [progressData.resolution]: progressData.frameCount,
-        },
-      }));
+      const { videoName, resolution, frameCount, percentage } = progressData;
+
+      setFolderSettings((prevSettings) => {
+        const videoProgress = prevSettings.progress[videoName] || {};
+        videoProgress[resolution] = { frameCount, percentage };
+
+        return {
+          ...prevSettings,
+          progress: {
+            ...prevSettings.progress,
+            [videoName]: videoProgress,
+          },
+        };
+      });
     };
+
     // Listen to progress updates
     window.electronAPI.onProgressSingle(handleProgressSingle);
     window.electronAPI.onProgressFolder(handleProgressFolder);
-  }, []);
+
+    // Cleanup listeners on unmount
+    // return () => {
+    //   window.electronAPI.removeListener('conversion-progress', handleProgressSingle);
+    //   window.electronAPI.removeListener('conversion-progress-folder', handleProgressFolder);
+    // };
+  }, [/* setSingleSettings, setFolderSettings */]);
 
   // Handle disable
   const isConvertingSingleVideo = Object.keys(singleSettings.progress).length > 0;
@@ -56,8 +74,8 @@ function App() {
           <h1 className="card-title text-3xl font-bold text-center mb-6">Video Converter</h1>
 
           {/* CPU and Priority Settings */}
-          <CpuSettings disabled={disableTabs}/>
-          <PrioritySettings disabled={disableTabs}/>
+          <CpuSettings disabled={disableTabs} />
+          <PrioritySettings disabled={disableTabs} />
 
           {/* Tabs */}
           <div role="tablist" className="tabs tabs-lifted">
@@ -82,9 +100,9 @@ function App() {
           {/* Tab Content */}
           <div className="mt-4">
             {activeTab === "single" ? (
-              <SingleVideoConversion disabled={disableTabs}/>
+              <SingleVideoConversion disabled={disableTabs} />
             ) : (
-              <FolderVideoConversion disabled={disableTabs}/>
+              <FolderVideoConversion disabled={disableTabs} />
             )}
           </div>
         </div>

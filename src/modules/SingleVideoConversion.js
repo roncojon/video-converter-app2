@@ -1,14 +1,12 @@
-// src/modules/SingleVideoConversion.js
 import React, { useEffect, useContext } from 'react';
 import { SettingsContext } from '../context/SettingsContext';
 
-function SingleVideoConversion({disabled}) {
+function SingleVideoConversion({ disabled }) {
   const {
     generalSettings,
     singleSettings,
     setSingleSettings,
   } = useContext(SettingsContext);
-
 
   const { selectedFile, outputFolder, outputText, progress } = singleSettings;
 
@@ -17,13 +15,14 @@ function SingleVideoConversion({disabled}) {
       progress: {},
       selectedFile: null,
       outputFolder: null,
-      outputText: null
+      outputText: null,
     });
     const selectedFilePath = await window.electronAPI.selectFile();
     setSingleSettings((prevSettings) => ({
       ...prevSettings,
       selectedFile: selectedFilePath,
-      outputFolder: prevSettings.outputFolder ||
+      outputFolder:
+        prevSettings.outputFolder ||
         selectedFilePath?.substring(0, selectedFilePath?.lastIndexOf('/')) ||
         selectedFilePath?.substring(0, selectedFilePath?.lastIndexOf('\\')),
     }));
@@ -41,7 +40,7 @@ function SingleVideoConversion({disabled}) {
     if (!selectedFile || !outputFolder) {
       setSingleSettings((prevSettings) => ({
         ...prevSettings,
-        outputText: "Please select a file and output folder.",
+        outputText: 'Please select a file and output folder.',
       }));
       return;
     }
@@ -66,31 +65,54 @@ function SingleVideoConversion({disabled}) {
     }
   };
 
+  console.log('progressssss', progress)
+  console.log('progressssssString', JSON.stringify(progress))
+  // Extract the file name with extension
+  const fileName = selectedFile?.split(/[/\\]/).pop();
+  // Extract the file name without the extension
+  const fileNameWithoutExt = fileName?.slice(0, fileName?.lastIndexOf('.'));
+
   return (
     <div>
       <div className="form-control mb-4">
-        <button onClick={handleSelectFile} className="btn btn-primary w-full mb-2" disabled={disabled}>
+        <button
+          onClick={handleSelectFile}
+          className="btn btn-primary w-full mb-2"
+          disabled={disabled}
+        >
           Choose File
         </button>
         <p className="text-sm text-gray-600 overflow-auto">
-          <span className="font-semibold">Selected file:</span> {selectedFile || "None"}
+          <span className="font-semibold">Selected file:</span>{' '}
+          {selectedFile || 'None'}
         </p>
       </div>
 
       <div className="form-control mb-4">
-        <button onClick={handleSelectFolder} className="btn btn-secondary w-full mb-2" disabled={disabled}>
+        <button
+          onClick={handleSelectFolder}
+          className="btn btn-secondary w-full mb-2"
+          disabled={disabled}
+        >
           Choose Output Folder
         </button>
         <p className="text-sm text-gray-600 overflow-auto">
-          <span className="font-semibold">Output folder:</span> {outputFolder || "None"}
+          <span className="font-semibold">Output folder:</span>{' '}
+          {outputFolder || 'None'}
         </p>
       </div>
 
       <div className="form-control mb-4">
-        <button onClick={handleConvertToHLS} className="btn btn-accent w-full" disabled={disabled}>
+        <button
+          onClick={handleConvertToHLS}
+          className="btn btn-accent w-full"
+          disabled={disabled}
+        >
           Convert to HLS
         </button>
       </div>
+
+      <h3 className="mt-6 text-base font-semibold">{fileNameWithoutExt ? (fileNameWithoutExt + ":") : ""}</h3>
 
       {outputText && (
         <div className="alert alert-info mt-4 overflow-auto">
@@ -98,21 +120,25 @@ function SingleVideoConversion({disabled}) {
         </div>
       )}
 
-      {Object.keys(progress).length > 0 && (
-        <div className="mt-6">
-          <h3 className="text-lg font-semibold mb-2">Progress:</h3>
-          <ul className="space-y-2">
-            {Object.entries(progress).map(([resolution, frameCount]) => (
-              <li key={resolution} className="text-sm">
-                <div className="flex justify-between">
-                  <span className="font-bold">{resolution}:</span>
-                  <span>{frameCount} frames processed</span>
-                </div>
-              </li>
-            ))}
-          </ul>
+      {progress?.percentage !== undefined && (
+        <div className="mt-4">
+          <div className="text-sm mb-2">
+            <span className="font-bold">Overall progress:</span>
+            <span> {progress?.percentage?.toFixed(2)}%</span>
+          </div>
+          <div className="text-sm mb-2">
+            <span className="font-semibold">Current Resolution:</span>{" "}
+            <span>{progress?.resolution || "Unknown"}</span>
+          </div>
+          <progress
+            className="progress progress-primary w-full"
+            value={progress?.percentage}
+            max="100"
+          ></progress>
         </div>
       )}
+
+
     </div>
   );
 }
