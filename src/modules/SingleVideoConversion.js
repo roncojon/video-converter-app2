@@ -1,5 +1,6 @@
 import React, { useEffect, useContext } from 'react';
 import { SettingsContext } from '../context/SettingsContext';
+import InfoIcon from '../components/InfoIcon';
 
 function SingleVideoConversion({ disabled }) {
   const {
@@ -83,7 +84,7 @@ function SingleVideoConversion({ disabled }) {
       <div className="form-control mb-4">
         <button
           onClick={handleSelectFile}
-          className="btn btn-primary w-full mb-2"
+          className="btn btn-primary w-full mb-2 " /* btn-outline */
           disabled={disabled}
         >
           Choose File
@@ -97,7 +98,7 @@ function SingleVideoConversion({ disabled }) {
       <div className="form-control mb-4">
         <button
           onClick={handleSelectFolder}
-          className="btn btn-secondary w-full mb-2"
+          className="btn btn-secondary w-full mb-2 " /* btn-outline */
           disabled={disabled}
         >
           Choose Output Folder
@@ -111,7 +112,7 @@ function SingleVideoConversion({ disabled }) {
       <div className="form-control mb-4">
         <button
           onClick={handleConvertToHLS}
-          className="btn btn-accent w-full"
+          className="btn btn-accent w-full " /* btn-outline */
           disabled={disabled}
         >
           Convert to HLS
@@ -121,7 +122,8 @@ function SingleVideoConversion({ disabled }) {
       {/* <h3 className="mt-6 text-base font-semibold">{fileNameWithoutExt ? (fileNameWithoutExt + ":") : ""}</h3> */}
 
       {outputText && (
-        <div className="alert alert-info mt-4 overflow-auto">
+        <div role="alert" className="alert mt-4 overflow-auto">
+          <InfoIcon />
           <span className="text-sm">{outputText}</span>
         </div>
       )}
@@ -143,12 +145,12 @@ function SingleVideoConversion({ disabled }) {
                 value={progress?.percentage}
                 max="100"
               ></progress>
+              {/* <div className="divider"></div> */}
+
             </li>
           </ul>
         </div>
       )}
-
-
     </div>
   );
 }

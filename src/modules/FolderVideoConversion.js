@@ -1,5 +1,6 @@
 import React, { useEffect, useContext } from 'react';
 import { SettingsContext } from '../context/SettingsContext';
+import InfoIcon from '../components/InfoIcon';
 
 function FolderVideoConversion({ disabled }) {
   const {
@@ -99,7 +100,7 @@ function FolderVideoConversion({ disabled }) {
       <div className="form-control mb-4">
         <button
           onClick={handleConvertFolderToHLS}
-          className="btn btn-accent w-full"
+          className="btn btn-accent w-full " /* text-white */
           disabled={disabled}
         >
           Convert All Videos to HLS
@@ -107,18 +108,19 @@ function FolderVideoConversion({ disabled }) {
       </div>
 
       {outputTextArray && (
-        <div className="alert alert-info mt-4 overflow-auto">
+        <div className="alert mt-4 overflow-auto">
+          <InfoIcon />
           <span className="text-sm">{outputTextArray}</span>
         </div>
       )}
 
       {Object.keys(progress).length > 0 && (
         <div className="mt-6">
-          <h3 className="text-lg font-semibold mb-4">Progress for Each Video:</h3>
+          {/* <h3 className="text-lg font-semibold mb-4">Progress for Each Video:</h3> */}
           <ul className="space-y-6">
             {Object.entries(progress).map(([videoName, videoProgress]) => (
               <>{videoName && videoName!=="undefined" ?
-                <li key={videoName} className="text-sm border-b pb-4">
+                <li key={videoName} className="text-sm border-b pb-4">  {/*  */}
                   <div className="mb-2">
                     <span className="font-bold">{videoName}:</span>
                     <span> {videoProgress?.percentage?.toFixed(2)}%</span>
@@ -132,6 +134,7 @@ function FolderVideoConversion({ disabled }) {
                     value={videoProgress?.percentage}
                     max="100"
                   ></progress>
+                  {/* <div className="divider"></div> */}
                 </li>
                 : null}
               </>

@@ -5,6 +5,7 @@ import FolderVideoConversion from './modules/FolderVideoConversion';
 import PrioritySettings from './modules/PrioritySettings';
 import CpuSettings from './modules/CpuSettings';
 import { SettingsContext } from './context/SettingsContext';
+import ThemeSelector from './components/ThemeSelector';
 
 function App() {
   const {
@@ -70,8 +71,10 @@ function App() {
     <div className="min-h-screen bg-base-200 flex justify-center">
       <div className="card w-full max-w-[452px] bg-base-100 shadow-xl m-6 min-w-[450px]">
         <div className="card-body">
-          <h1 className="card-title text-3xl font-bold text-center mb-6">Video Converter</h1>
-
+          <div className=' flex justify-between items-center mb-4'>
+            <h1 className="card-title text-3xl font-bold text-center mb-1">Video Converter</h1>
+            <ThemeSelector />
+          </div>
           {/* CPU and Priority Settings */}
           <CpuSettings disabled={disableTabs} />
           <PrioritySettings disabled={disableTabs} />
@@ -80,9 +83,8 @@ function App() {
           <div role="tablist" className="tabs tabs-lifted">
             <a
               role="tab"
-              className={`tab ${activeTab === "single" ? "tab-active" : ""} ${
-                disableTabs && activeTab !== "single" ? "tab-disabled" : ""
-              }`}
+              className={`tab ${activeTab === "single" ? "tab-active" : ""} ${disableTabs && activeTab !== "single" ? "tab-disabled" : ""
+                }`}
               onClick={() => !disableTabs && setActiveTab("single")}
               style={{ pointerEvents: disableTabs && activeTab !== "single" ? "none" : "auto" }}
             >
@@ -90,9 +92,8 @@ function App() {
             </a>
             <a
               role="tab"
-              className={`tab ${activeTab === "folder" ? "tab-active" : ""} ${
-                disableTabs && activeTab !== "folder" ? "tab-disabled" : ""
-              }`}
+              className={`tab ${activeTab === "folder" ? "tab-active" : ""} ${disableTabs && activeTab !== "folder" ? "tab-disabled" : ""
+                }`}
               onClick={() => !disableTabs && setActiveTab("folder")}
               style={{ pointerEvents: disableTabs && activeTab !== "folder" ? "none" : "auto" }}
             >

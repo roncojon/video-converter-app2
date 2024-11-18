@@ -10,6 +10,9 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  scrollbar-width: thin; /* Firefox: lean scrollbar */
+  scrollbar-color: #888 #f1f1f1; /* Scrollbar thumb and track color */
 }
 
 code {
