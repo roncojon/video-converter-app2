@@ -71,55 +71,60 @@ function FolderVideoConversion({ disabled }) {
 
   return (
     <div>
-      <div className="form-control mb-4">
+      <div className="form-control mb-4 flex-row items-center gap-5">
         <button
           onClick={handleSelectFolder}
-          className="btn btn-primary w-full mb-2"
+          className="btn btn-primary w-[240px] "
           disabled={disabled}
         >
           Choose Folder with Videos
         </button>
-        <p className="text-sm text-gray-600 overflow-auto">
-          <span className="font-semibold">Selected folder:</span> {selectedFolder || "None"}
-        </p>
+        <div className="alert overflow-auto">
+          <p className="text-sm text-gray-600 overflow-auto">
+            <span className="font-semibold">Selected folder:</span> {selectedFolder || "None"}
+          </p>
+        </div>
       </div>
 
-      <div className="form-control mb-4">
+      <div className="form-control mb-4 flex-row items-center gap-5">
         <button
           onClick={handleSelectOutputFolder}
-          className="btn btn-secondary w-full mb-2"
+          className="btn btn-secondary w-[240px] "
           disabled={disabled}
         >
           Choose Output Folder
         </button>
-        <p className="text-sm text-gray-600 overflow-auto">
-          <span className="font-semibold">Output folder:</span> {outputFolder || "None"}
-        </p>
+        <div className="alert overflow-auto">
+          <p className="text-sm text-gray-600 overflow-auto">
+            <span className="font-semibold">Output folder:</span> {outputFolder || "None"}
+          </p>
+        </div>
+
       </div>
 
-      <div className="form-control mb-4">
+      <div className="form-control mb-4 flex-row items-center gap-5">
         <button
           onClick={handleConvertFolderToHLS}
-          className="btn btn-accent w-full " /* text-white */
+          className="btn btn-accent w-[240px] " /* text-white */
           disabled={disabled}
         >
           Convert All Videos to HLS
         </button>
+
+        {outputTextArray && (
+          <div className="alert overflow-auto">
+            <InfoIcon />
+            <span className="text-sm">{outputTextArray}</span>
+          </div>
+        )}
       </div>
 
-      {outputTextArray && (
-        <div className="alert mt-4 overflow-auto">
-          <InfoIcon />
-          <span className="text-sm">{outputTextArray}</span>
-        </div>
-      )}
-
       {Object.keys(progress).length > 0 && (
-        <div className="mt-6">
+        <div className="mt-6 w-full">
           {/* <h3 className="text-lg font-semibold mb-4">Progress for Each Video:</h3> */}
           <ul className="space-y-6">
             {Object.entries(progress).map(([videoName, videoProgress]) => (
-              <>{videoName && videoName!=="undefined" ?
+              <>{videoName && videoName !== "undefined" ?
                 <li key={videoName} className="text-sm border-b pb-4">  {/*  */}
                   <div className="mb-2 overflow-auto">
                     <span className="font-bold">{videoName}:</span>

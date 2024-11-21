@@ -69,7 +69,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-base-200 flex justify-center">
-      <div className="card w-full max-w-[452px] bg-base-100 shadow-xl m-6 min-w-[450px]">
+      <div className="card w-full  bg-base-100 shadow-xl m-6 "> {/*  min-w-[550px] */}
         <div className="card-body">
           <div className=' flex justify-between items-center mb-4'>
             <h1 className="card-title text-3xl font-bold text-center mb-1">Video Converter</h1>

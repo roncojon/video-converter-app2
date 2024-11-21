@@ -5,7 +5,8 @@ const { setupIpcHandlers } = require('./ipcHandlers'); // Import the IPC handler
 function createWindow() {
   const win = new BrowserWindow({
     width: 800,
-    height: 600,
+    height: 770,
+    minWidth:700,
     webPreferences: {
       preload: path.resolve(__dirname, 'preload.js'),
       contextIsolation: true,
