@@ -121,7 +121,7 @@ function FolderVideoConversion({ disabled }) {
             {Object.entries(progress).map(([videoName, videoProgress]) => (
               <>{videoName && videoName!=="undefined" ?
                 <li key={videoName} className="text-sm border-b pb-4">  {/*  */}
-                  <div className="mb-2">
+                  <div className="mb-2 overflow-auto">
                     <span className="font-bold">{videoName}:</span>
                     <span> {videoProgress?.percentage?.toFixed(2)}%</span>
                   </div>

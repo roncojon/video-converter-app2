@@ -131,9 +131,9 @@ function SingleVideoConversion({ disabled }) {
       {progress?.percentage !== undefined && (
         <div className="mt-4 ">
           <ul className="space-y-6">
-            <li key={progress.videoName} className="text-sm border-b pb-4">
-              <div className="text-sm mb-2">
-                <span className="font-bold">{progress.videoName}:</span>
+            <li key={progress.videoName} className="text-sm border-b pb-4 ">
+              <div className="text-sm mb-2 overflow-auto">
+                <span className="font-bold ">{progress.videoName}:</span>
                 <span> {progress?.percentage?.toFixed(2)}%</span>
               </div>
               <div className="text-sm mb-2">
