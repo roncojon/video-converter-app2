@@ -4,7 +4,11 @@ module.exports = {
     "./src/**/*.{js,jsx,ts,tsx}", // Include your React components
   ],
   theme: {
-    extend: {},
+    extend: {
+      // fontSize: {
+      //   sm: '0.8rem', // Customize the size as needed
+      // },
+    },
   },
   plugins: [
     require('daisyui'), // Add DaisyUI as a plugin
@@ -14,10 +18,23 @@ module.exports = {
       {
         light: {
           ...require("daisyui/src/theming/themes")["light"],
-          accent: "#1bbb59", // Set the accent color to red
-          // "accent-focus": "#e9f2ed", // Set the accent color focus state to red
-          "accent-content": "#e9f2ed", // Set the accent content color to white
+          "accent": "#92efb6", // Customize accent color
+          // "accent-content": "#e9f2ed", // Accent content color
+
+          "primary": "#e2e8f0", // slate-200 for primary buttons (light theme)
+          "primary-content": "#1e293b", // slate-700 for text on primary buttons
         },
-      }, "dark"], // Enable both light and dark themes
+      },
+      {
+        dark: {
+          ...require("daisyui/src/theming/themes")["dark"],
+          "accent-content": "#e9f2ed", // Accent content color
+          "accent": "#169647", // Customize accent color
+
+          "primary": "#334155", // slate-700 for primary buttons (dark theme)
+          "primary-content": "#f1f5f9", // slate-200 for text on primary buttons
+        },
+      },
+    ],
   },
 }

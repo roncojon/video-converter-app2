@@ -70,49 +70,49 @@ function FolderVideoConversion({ disabled }) {
   };
 
   return (
-    <div>
-      <div className="form-control mb-4 flex-row items-center gap-5">
+    <>
+      <div className="form-control mb-4 flex-row items-center gap-5 ">
         <button
           onClick={handleSelectFolder}
-          className="btn btn-primary w-[240px] "
+          className="btn btn-primary   w-[240px] "
           disabled={disabled}
         >
           Choose Folder with Videos
         </button>
-        <div className="alert overflow-auto">
-          <p className="text-sm text-gray-600 overflow-auto">
+        {/* <div className="alert overflow-auto"> */}
+          <p className="text-sm text-gray-500 overflow-auto whitespace-nowrap">
             <span className="font-semibold">Selected folder:</span> {selectedFolder || "None"}
           </p>
-        </div>
+        {/* </div> */}
       </div>
 
-      <div className="form-control mb-4 flex-row items-center gap-5">
+      <div className="form-control mb-8 flex-row items-center gap-5 ">
         <button
           onClick={handleSelectOutputFolder}
-          className="btn btn-secondary w-[240px] "
+          className="btn btn-primary   w-[240px] "
           disabled={disabled}
         >
           Choose Output Folder
         </button>
-        <div className="alert overflow-auto">
-          <p className="text-sm text-gray-600 overflow-auto">
+        {/* <div className="alert overflow-auto"> */}
+          <p className="text-sm text-gray-500 overflow-auto whitespace-nowrap">
             <span className="font-semibold">Output folder:</span> {outputFolder || "None"}
           </p>
-        </div>
+        {/* </div> */}
 
       </div>
 
-      <div className="form-control mb-4 flex-row items-center gap-5">
+      <div className="form-control mb-4 flex-row items-center gap-5 ">
         <button
           onClick={handleConvertFolderToHLS}
-          className="btn btn-accent w-[240px] " /* text-white */
+          className="btn btn-accent  w-[240px] " /* text-white */
           disabled={disabled}
         >
           Convert All Videos to HLS
         </button>
 
         {outputTextArray && (
-          <div className="alert overflow-auto">
+          <div className="alert  overflow-auto whitespace-nowrap">
             <InfoIcon />
             <span className="text-sm">{outputTextArray}</span>
           </div>
@@ -135,7 +135,7 @@ function FolderVideoConversion({ disabled }) {
                     <span>{videoProgress?.resolution || "Unknown"}</span>
                   </div>
                   <progress
-                    className="progress progress-primary w-full"
+                    className="progress progress-accent w-full"
                     value={videoProgress?.percentage}
                     max="100"
                   ></progress>
@@ -147,7 +147,7 @@ function FolderVideoConversion({ disabled }) {
           </ul>
         </div>
       )}
-    </div>
+    </>
   );
 }
 
