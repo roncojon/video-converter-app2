@@ -102,7 +102,7 @@ function FolderVideoConversion({ disabled }) {
 
       </div>
 
-      <div className="form-control mb-4 flex-row items-center gap-5 ">
+      <div className="form-control mb-4 flex-row  gap-5 "> {/* items-center */}
         <button
           onClick={handleConvertFolderToHLS}
           className="btn btn-accent  w-[240px] " /* text-white */
@@ -112,7 +112,7 @@ function FolderVideoConversion({ disabled }) {
         </button>
 
         {outputTextArray && (
-          <div className="alert  overflow-auto whitespace-nowrap">
+          <div className="alert  overflow-auto mt-[-4px]"> {/* whitespace-nowrap */}
             <InfoIcon />
             <span className="text-sm">{outputTextArray}</span>
           </div>
