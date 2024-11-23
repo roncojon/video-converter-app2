@@ -68,8 +68,8 @@ function App() {
   const disableTabs = isConvertingSingleVideo || isConvertingFolder;
 
   return (
-    <div className="min-h-screen bg-base-200 flex justify-center">
-      <div className="card w-full  bg-base-100 shadow-xl m-6 "> {/*  min-w-[550px] */}
+    <div className="min-h-screen bg-base-200 flex justify-center ">
+      <div className="card w-full  bg-base-100 shadow-xl m-6 scale-[0.85]"> {/*  min-w-[550px] */}
         <div className="card-body">
           <div className=' flex justify-between items-center mb-4'>
             <h1 className="card-title text-3xl font-bold text-center mb-1">Video Converter</h1>
@@ -80,26 +80,40 @@ function App() {
           <PrioritySettings disabled={disableTabs} />
 
           {/* Tabs */}
-          <div role="tablist" className="tabs tabs-lifted">
+          <div
+            role="tablist"
+            className="tabs tabs-lifted w-full"
+            style={{
+              boxSizing:'border-box',
+              '--tab-border': '2px', // Increase border thickness
+              // '--tab-border-color': 'blue', // Make the border color more distinct
+              // '--tab-padding': '1.5rem', // Add more padding inside tabs for better visibility
+            }}
+          >
             <a
               role="tab"
-              className={`tab ${activeTab === "single" ? "tab-active" : ""} ${disableTabs && activeTab !== "single" ? "tab-disabled" : ""
+              className={`tab ${activeTab === 'single' ? 'tab-active' : ''} ${disableTabs && activeTab !== 'single' ? 'tab-disabled' : ''
                 }`}
-              onClick={() => !disableTabs && setActiveTab("single")}
-              style={{ pointerEvents: disableTabs && activeTab !== "single" ? "none" : "auto" }}
+              onClick={() => !disableTabs && setActiveTab('single')}
+              style={{
+                pointerEvents: disableTabs && activeTab !== 'single' ? 'none' : 'auto',
+              }}
             >
               Convert Single Video
             </a>
             <a
               role="tab"
-              className={`tab ${activeTab === "folder" ? "tab-active" : ""} ${disableTabs && activeTab !== "folder" ? "tab-disabled" : ""
+              className={`tab ${activeTab === 'folder' ? 'tab-active' : ''} ${disableTabs && activeTab !== 'folder' ? 'tab-disabled' : ''
                 }`}
-              onClick={() => !disableTabs && setActiveTab("folder")}
-              style={{ pointerEvents: disableTabs && activeTab !== "folder" ? "none" : "auto" }}
+              onClick={() => !disableTabs && setActiveTab('folder')}
+              style={{
+                pointerEvents: disableTabs && activeTab !== 'folder' ? 'none' : 'auto',
+              }}
             >
               Convert All Videos from Folder
             </a>
           </div>
+
 
           {/* Tab Content */}
           <div className="mt-4">

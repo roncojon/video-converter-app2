@@ -102,7 +102,7 @@ function FolderVideoConversion({ disabled }) {
 
       </div>
 
-      <div className="form-control mb-4 flex-row  gap-5 "> {/* items-center */}
+      <div className="form-control mb-6 flex-row  gap-5 "> {/* items-center */}
         <button
           onClick={handleConvertFolderToHLS}
           className="btn btn-accent  w-[240px] " /* text-white */
@@ -120,7 +120,7 @@ function FolderVideoConversion({ disabled }) {
       </div>
 
       {Object.keys(progress).length > 0 && (
-        <div className="mt-6 w-full">
+        <div className=" w-full">
           {/* <h3 className="text-lg font-semibold mb-4">Progress for Each Video:</h3> */}
           <ul className="space-y-6">
             {Object.entries(progress).map(([videoName, videoProgress]) => (

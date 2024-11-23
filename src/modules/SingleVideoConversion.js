@@ -80,56 +80,56 @@ function SingleVideoConversion({ disabled }) {
   // const fileNameWithoutExt = fileName?.slice(0, fileName?.lastIndexOf('.'));
 
   return (
-    <div>
-      <div className="form-control mb-4">
+    <>
+      <div className="form-control mb-4 flex-row items-center gap-5 ">
         <button
           onClick={handleSelectFile}
-          className="btn btn-primary w-full mb-2 " /* btn-outline */
+          className="btn btn-primary w-[240px]  " /* btn-outline */
           disabled={disabled}
         >
           Choose File
         </button>
-        <p className="text-sm text-gray-600 overflow-auto">
+        <p className="text-sm text-gray-500 overflow-auto whitespace-nowrap">
           <span className="font-semibold">Selected file:</span>{' '}
           {selectedFile || 'None'}
         </p>
       </div>
 
-      <div className="form-control mb-4">
+      <div className="form-control mb-8 flex-row items-center gap-5 ">
         <button
           onClick={handleSelectFolder}
-          className="btn btn-secondary w-full mb-2 " /* btn-outline */
+          className="btn btn-primary w-[240px] " /* btn-outline */
           disabled={disabled}
         >
           Choose Output Folder
         </button>
-        <p className="text-sm text-gray-600 overflow-auto">
+        <p className="text-sm text-gray-500 overflow-auto whitespace-nowrap">
           <span className="font-semibold">Output folder:</span>{' '}
           {outputFolder || 'None'}
         </p>
       </div>
 
-      <div className="form-control mb-4">
+      <div className="form-control mb-6 flex-row gap-5 ">
         <button
           onClick={handleConvertToHLS}
-          className="btn btn-accent w-full " /* btn-outline */
+          className="btn btn-accent w-[240px]" /* btn-outline */
           disabled={disabled}
         >
           Convert to HLS
         </button>
+
+        {/* <h3 className="mt-6 text-base font-semibold">{fileNameWithoutExt ? (fileNameWithoutExt + ":") : ""}</h3> */}
+
+        {outputText && (
+          <div role="alert" className="alert overflow-auto mt-[-4px]">
+            <InfoIcon />
+            <span className="text-sm">{outputText}</span>
+          </div>
+        )}
       </div>
 
-      {/* <h3 className="mt-6 text-base font-semibold">{fileNameWithoutExt ? (fileNameWithoutExt + ":") : ""}</h3> */}
-
-      {outputText && (
-        <div role="alert" className="alert mt-4 overflow-auto">
-          <InfoIcon />
-          <span className="text-sm">{outputText}</span>
-        </div>
-      )}
-
       {progress?.percentage !== undefined && (
-        <div className="mt-4 ">
+        <div className=" w-full">
           <ul className="space-y-6">
             <li key={progress.videoName} className="text-sm border-b pb-4 ">
               <div className="text-sm mb-2 overflow-auto">
@@ -141,7 +141,7 @@ function SingleVideoConversion({ disabled }) {
                 <span>{progress?.resolution || "Unknown"}</span>
               </div>
               <progress
-                className="progress progress-primary w-full"
+                className="progress progress-accent w-full"
                 value={progress?.percentage}
                 max="100"
               ></progress>
@@ -151,7 +151,7 @@ function SingleVideoConversion({ disabled }) {
           </ul>
         </div>
       )}
-    </div>
+    </>
   );
 }
 
