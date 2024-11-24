@@ -1,12 +1,12 @@
 // src/modules/CpuSettings.js
 import React, { useState, useEffect, useContext } from 'react';
-import { SettingsContext } from '../context/SettingsContext';
+import { SingleTaskSettingsContext } from '../context/SingleTaskSettingsContext';
 
 function CpuSettings({disabled}) {
     const {
         generalSettings, 
         setGeneralSettings,
-      } = useContext(SettingsContext);
+      } = useContext(SingleTaskSettingsContext);
 
     const [cpuCount, setCpuCount] = useState(0);
 

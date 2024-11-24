@@ -21,6 +21,7 @@ function createWindow() {
     // Load the React development server in development
     win.loadURL('http://localhost:3000');
   }
+  // win.webContents.setZoomFactor(0.85);
 }
 
 app.on('ready', () => {

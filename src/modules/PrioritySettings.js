@@ -1,12 +1,12 @@
 // src/modules/PrioritySettings.js
 import React, { useContext, useState } from 'react';
-import { SettingsContext } from '../context/SettingsContext';
+import { SingleTaskSettingsContext } from '../context/SingleTaskSettingsContext';
 
 function PrioritySettings({disabled}) {
   const {
     generalSettings, 
     setGeneralSettings,
-  } = useContext(SettingsContext);
+  } = useContext(SingleTaskSettingsContext);
 
   const handlePriorityChange = (event) => {
     const priority = event.target.value;

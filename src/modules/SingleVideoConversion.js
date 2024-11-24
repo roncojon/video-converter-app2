@@ -1,5 +1,5 @@
 import React, { useEffect, useContext } from 'react';
-import { SettingsContext } from '../context/SettingsContext';
+import { SingleTaskSettingsContext } from '../context/SingleTaskSettingsContext';
 import InfoIcon from '../components/InfoIcon';
 
 function SingleVideoConversion({ disabled }) {
@@ -7,7 +7,7 @@ function SingleVideoConversion({ disabled }) {
     generalSettings,
     singleSettings,
     setSingleSettings,
-  } = useContext(SettingsContext);
+  } = useContext(SingleTaskSettingsContext);
 
   const { selectedFile, outputFolder, outputText, progress } = singleSettings;
 

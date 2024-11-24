@@ -1,5 +1,5 @@
 import React, { useEffect, useContext } from 'react';
-import { SettingsContext } from '../context/SettingsContext';
+import { SingleTaskSettingsContext } from '../context/SingleTaskSettingsContext';
 import InfoIcon from '../components/InfoIcon';
 
 function FolderVideoConversion({ disabled }) {
@@ -7,7 +7,7 @@ function FolderVideoConversion({ disabled }) {
     generalSettings,
     folderSettings,
     setFolderSettings,
-  } = useContext(SettingsContext);
+  } = useContext(SingleTaskSettingsContext);
 
   const { selectedFolder, outputFolder, outputTextArray, progress } = folderSettings;
 

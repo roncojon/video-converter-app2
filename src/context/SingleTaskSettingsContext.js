@@ -1,7 +1,7 @@
-// src/contexts/SettingsContext.js
+// src/contexts/SingleTaskSettingsContext.js
 import React, { createContext, useState } from 'react';
 
-export const SettingsContext = createContext();
+export const SingleTaskSettingsContext = createContext();
 
 export function SettingsProvider({ children }) {
   const [activeTab, setActiveTab] = useState("single");
@@ -32,7 +32,7 @@ export function SettingsProvider({ children }) {
   });
 
   return (
-    <SettingsContext.Provider
+    <SingleTaskSettingsContext.Provider
       value={{
         activeTab,
         setActiveTab,
@@ -45,6 +45,6 @@ export function SettingsProvider({ children }) {
       }}
     >
       {children}
-    </SettingsContext.Provider>
+    </SingleTaskSettingsContext.Provider>
   );
 }

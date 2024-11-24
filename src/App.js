@@ -4,7 +4,7 @@ import SingleVideoConversion from './modules/SingleVideoConversion';
 import FolderVideoConversion from './modules/FolderVideoConversion';
 import PrioritySettings from './modules/PrioritySettings';
 import CpuSettings from './modules/CpuSettings';
-import { SettingsContext } from './context/SettingsContext';
+import { SingleTaskSettingsContext } from './context/SingleTaskSettingsContext';
 import ThemeSelector from './components/ThemeSelector';
 
 function App() {
@@ -15,7 +15,7 @@ function App() {
     setSingleSettings,
     folderSettings,
     setFolderSettings,
-  } = useContext(SettingsContext);
+  } = useContext(SingleTaskSettingsContext);
 
   // Handle progress updates from Electron
   useEffect(() => {
@@ -69,7 +69,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-base-200 flex justify-center ">
-      <div className="card w-full  bg-base-100 shadow-xl m-6 scale-[0.85]"> {/*  min-w-[550px] */}
+      <div className="card w-full  bg-base-100 shadow-xl m-6 "> {/*  min-w-[550px] */} {/* scale-[0.85] */}
         <div className="card-body">
           <div className=' flex justify-between items-center mb-4'>
             <h1 className="card-title text-3xl font-bold text-center mb-1">Video Converter</h1>
