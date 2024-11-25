@@ -1,6 +1,6 @@
 // src/modules/Task/FolderVideoConversion.js
 import React, { useEffect, useContext } from 'react';
-import { SingleTaskSettingsContext } from '../../context/SingleTaskSettingsContext';
+import { SingleTaskSettingsContext } from '../../contexts/SingleTaskSettingsContext';
 import InfoIcon from '../../components/InfoIcon';
 
 function FolderVideoConversion({ disabled }) {

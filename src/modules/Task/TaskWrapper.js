@@ -1,7 +1,7 @@
 // src/modules/Task/TaskWrapper.js
 
 import React, { useState } from 'react'
-import { SettingsProvider } from '../../context/SingleTaskSettingsContext';
+import { SettingsProvider } from '../../contexts/SingleTaskSettingsContext';
 import Task from './Task';
 import { v4 as uuidv4 } from 'uuid';
 

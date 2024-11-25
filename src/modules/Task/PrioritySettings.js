@@ -1,6 +1,6 @@
 // src/modules/Task/PrioritySettings.js
 import React, { useContext, useState } from 'react';
-import { SingleTaskSettingsContext } from '../../context/SingleTaskSettingsContext';
+import { SingleTaskSettingsContext } from '../../contexts/SingleTaskSettingsContext';
 
 function PrioritySettings({disabled}) {
   const {

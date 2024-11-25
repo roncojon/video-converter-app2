@@ -5,7 +5,7 @@ import SingleVideoConversion from './SingleVideoConversion';
 import FolderVideoConversion from './FolderVideoConversion';
 import PrioritySettings from './PrioritySettings';
 import CpuSettings from './CpuSettings';
-import { SingleTaskSettingsContext } from '../../context/SingleTaskSettingsContext';
+import { SingleTaskSettingsContext } from '../../contexts/SingleTaskSettingsContext';
 import ThemeSelector from '../../components/ThemeSelector';
 
 function Task() {
