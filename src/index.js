@@ -3,12 +3,12 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
-import TaskWrapper from './modules/Task/TaskWrapper';
+import App from './App';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-      <TaskWrapper />
+      <App />
   </React.StrictMode>
 );
 

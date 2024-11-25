@@ -1,6 +1,6 @@
-// src/modules/TaskQueue/FolderVideoConversion.js
+// src/modules/TasksQueue/TasksQueue.js
 
-import React, { useState, useEffect } from 'react';
+import React, { useContext } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -17,18 +17,11 @@ import {
 } from '@dnd-kit/sortable';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import SortableItem from './SortableItem';
+import { TasksQueueContext } from '../../contexts/TasksQueueContext';
 
-const initialVideos = [
-  { id: '3', name: 'Video 3.mp4', status: 'converted' },
-  { id: '6', name: 'Video 6.mp4', status: 'converted' },
-  { id: '1', name: 'Video 1.mp4', status: 'converting' },
-  { id: '2', name: 'Video 2.mp4', status: 'pending' },
-  { id: '4', name: 'Video 4.mp4', status: 'pending' },
-];
-
-// Main queue component
 const TasksQueue = () => {
-  const [videos, setVideos] = useState(initialVideos);
+  const { tasks, updateTask } = useContext(TasksQueueContext);
+  const taskIds = Object.keys(tasks);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -39,45 +32,19 @@ const TasksQueue = () => {
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
-  
-    if (!over || active.id === over.id) return; // Exit if no valid drop target or nothing changed
-  
-    setVideos((prev) => {
-      // Split videos into groups
-      const convertedVideos = prev.filter((video) => video.status === 'converted');
-      const convertingVideo = prev.find((video) => video.status === 'converting');
-      const pendingVideos = prev.filter((video) => video.status === 'pending');
-  
-      // Find indices in the pending group
-      const oldIndex = pendingVideos.findIndex((video) => video.id === active.id);
-      const newIndex = pendingVideos.findIndex((video) => video.id === over.id);
-  
-      if (oldIndex === -1 || newIndex === -1) return prev; // Only allow dragging pending videos
-  
-      // Reorder pending videos
-      const reorderedPending = arrayMove(pendingVideos, oldIndex, newIndex);
-  
-      // Rebuild the list: converted first, converting second, reordered pending third
-      return [...convertedVideos, convertingVideo, ...reorderedPending];
-    });
+
+    if (!over || active.id === over.id) return;
+
+    const reorderedTaskIds = arrayMove(taskIds, taskIds.indexOf(active.id), taskIds.indexOf(over.id));
+
+    // Update the tasks order by recreating the object in the new order
+    const reorderedTasks = reorderedTaskIds.reduce((acc, id) => {
+      acc[id] = tasks[id];
+      return acc;
+    }, {});
+
+    updateTask(null, reorderedTasks); // Bulk update tasks
   };
-  
-
-  const handleDelete = (id) => {
-    setVideos((prev) => prev.filter((video) => video.id !== id));
-  };
-
-  // Listen for delete events
-  useEffect(() => {
-    const onDelete = (e) => {
-      const event = e;
-      handleDelete(event.detail);
-    };
-
-    document.addEventListener('delete-video', onDelete);
-
-    return () => document.removeEventListener('delete-video', onDelete);
-  }, []);
 
   return (
     <div className="container mx-auto p-4">
@@ -85,20 +52,20 @@ const TasksQueue = () => {
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
-        modifiers={[restrictToVerticalAxis]} // Restrict dragging to vertical axis
+        modifiers={[restrictToVerticalAxis]}
         onDragEnd={handleDragEnd}
       >
         <SortableContext
-          items={videos.map((video) => video.id)}
+          items={taskIds}
           strategy={verticalListSortingStrategy}
         >
           <ul className="space-y-4">
-            {videos.map((video) => (
+            {taskIds.map((taskId) => (
               <SortableItem
-                key={video.id}
-                video={video}
+                key={taskId}
+                taskId={taskId}
                 disabled={
-                  video.status === 'converting' || video.status === 'converted'
+                  tasks[taskId].status === 'converting' || tasks[taskId].status === 'converted'
                 }
               />
             ))}

@@ -1,13 +1,10 @@
 // src/contexts/SingleTaskSettingsContext.js
 import React, { createContext, useState } from 'react';
-// import { v4 as uuidv4 } from 'uuid';
 
 export const SingleTaskSettingsContext = createContext();
 
 export function SettingsProvider({ children, taskId}) {
-  // const uniqueId = uuidv4(); // Generate the UUID once
 
-  // const [taskId, setTaskId] = useState(taskId);
   const [taskEventNames, setTaskEventNames] = useState({
     eventNameSingleConversion: 'conversion-progress-' + taskId,
     eventNameFolderConversion: 'conversion-progress-folder-' + taskId
@@ -21,8 +18,6 @@ export function SettingsProvider({ children, taskId}) {
   });
 
   const [singleSettings, setSingleSettings] = useState({
-    // cpuSelection: 0,
-    // priorityLevel: 'normal',
     progress: {},
     selectedFile: null,
     outputFolder: null,
@@ -31,8 +26,6 @@ export function SettingsProvider({ children, taskId}) {
   });
 
   const [folderSettings, setFolderSettings] = useState({
-    // cpuSelection: 0,
-    // priorityLevel: 'normal',
     progress: {},
     selectedFolder: null,
     outputFolder: null,
