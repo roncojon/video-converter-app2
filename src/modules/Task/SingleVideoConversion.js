@@ -1,16 +1,19 @@
-// src/modules/Task/SingleVideoConversion.js
-
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect, useContext, useState } from 'react';
 import { SingleTaskSettingsContext } from '../../contexts/SingleTaskSettingsContext';
 import InfoIcon from '../../components/InfoIcon';
+import { TasksQueueContext } from '../../contexts/TasksQueueContext';
 
 function SingleVideoConversion({ disabled }) {
   const {
+    taskId,
     taskEventNames,
     generalSettings,
     singleSettings,
     setSingleSettings,
   } = useContext(SingleTaskSettingsContext);
+
+  const { tasks, addOrUpdateTask } = useContext(TasksQueueContext);
+  const [isConfirmed, setIsConfirmed] = useState(false); // Track if the task is confirmed
 
   const { selectedFile, outputFolder, outputText, progress } = singleSettings;
 
@@ -52,7 +55,7 @@ function SingleVideoConversion({ disabled }) {
     try {
       setSingleSettings((prevSettings) => ({
         ...prevSettings,
-        converting: true
+        converting: true,
       }));
       const result = await window.electronAPI.generateHls(
         selectedFile,
@@ -64,9 +67,10 @@ function SingleVideoConversion({ disabled }) {
       setSingleSettings((prevSettings) => ({
         ...prevSettings,
         outputText: result,
-        converting: false
-        // progress: {}, // Reset progress after conversion completes
+        converting: false,
       }));
+      // Mark the task as completed in the queue
+      addOrUpdateTask({ ...tasks[taskId], status: 'completed' });
     } catch (error) {
       setSingleSettings((prevSettings) => ({
         ...prevSettings,
@@ -76,20 +80,27 @@ function SingleVideoConversion({ disabled }) {
     }
   };
 
-  console.log('progressssss', progress)
-  console.log('progressssssString', JSON.stringify(progress))
-  // // Extract the file name with extension
-  // const fileName = selectedFile?.split(/[/\\]/).pop();
-  // // Extract the file name without the extension
-  // const fileNameWithoutExt = fileName?.slice(0, fileName?.lastIndexOf('.'));
+  const handleConfirmTask = () => {
+    setIsConfirmed(true);
+
+    // Add the task to the queue with detailed task data
+    addOrUpdateTask({
+      id: taskId,
+      taskEventNames,
+      generalSettings,
+      singleSettings,
+      folderSettings: {}, // Folder settings are irrelevant for single conversion
+      status: 'confirmed',
+    });
+  };
 
   return (
     <>
       <div className="form-control mb-4 flex-row items-center gap-5 ">
         <button
           onClick={handleSelectFile}
-          className="btn btn-primary w-[240px]  " /* btn-outline */
-          disabled={disabled}
+          className="btn btn-primary w-[240px]"
+          disabled={disabled || isConfirmed}
         >
           Choose File
         </button>
@@ -102,8 +113,8 @@ function SingleVideoConversion({ disabled }) {
       <div className="form-control mb-8 flex-row items-center gap-5 ">
         <button
           onClick={handleSelectFolder}
-          className="btn btn-primary w-[240px] " /* btn-outline */
-          disabled={disabled}
+          className="btn btn-primary w-[240px]"
+          disabled={disabled || isConfirmed}
         >
           Choose Output Folder
         </button>
@@ -114,15 +125,17 @@ function SingleVideoConversion({ disabled }) {
       </div>
 
       <div className="form-control mb-6 flex-row gap-5 ">
-        <button
-          onClick={handleConvertToHLS}
-          className="btn btn-accent w-[240px]" /* btn-outline */
-          disabled={disabled}
-        >
-          Convert to HLS
-        </button>
-
-        {/* <h3 className="mt-6 text-base font-semibold">{fileNameWithoutExt ? (fileNameWithoutExt + ":") : ""}</h3> */}
+        {!isConfirmed ? (
+          <button
+            onClick={handleConfirmTask}
+            className="btn btn-accent w-[240px]"
+            disabled={disabled || !selectedFile || !outputFolder} // Disable if file or folder is missing
+          >
+            Confirm Task
+          </button>
+        ) : (
+          <p className="text-gray-500">Task Confirmed</p>
+        )}
 
         {outputText && (
           <div role="alert" className="alert overflow-auto mt-[-4px]">
@@ -133,24 +146,22 @@ function SingleVideoConversion({ disabled }) {
       </div>
 
       {progress?.percentage !== undefined && (
-        <div className=" w-full">
+        <div className="w-full">
           <ul className="space-y-6">
             <li key={progress.videoName} className="text-sm border-b pb-4 ">
               <div className="text-sm mb-2 overflow-auto">
-                <span className="font-bold ">{progress.videoName}:</span>
+                <span className="font-bold">{progress.videoName}:</span>
                 <span> {progress?.percentage?.toFixed(2)}%</span>
               </div>
               <div className="text-sm mb-2">
-                <span className="font-semibold">Current Resolution:</span>{" "}
-                <span>{progress?.resolution || "Unknown"}</span>
+                <span className="font-semibold">Current Resolution:</span>{' '}
+                <span>{progress?.resolution || 'Unknown'}</span>
               </div>
               <progress
                 className="progress progress-accent w-full"
                 value={progress?.percentage}
                 max="100"
               ></progress>
-              {/* <div className="divider"></div> */}
-
             </li>
           </ul>
         </div>
