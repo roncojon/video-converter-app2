@@ -1,17 +1,14 @@
+// src/index.js
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import App from './App';
-import App2 from './modules/TasksQueue/App2';
 import reportWebVitals from './reportWebVitals';
-import { SettingsProvider } from './context//SingleTaskSettingsContext';
+import TaskWrapper from './modules/Task/TaskWrapper';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <SettingsProvider>
-      <App2 />
-    </SettingsProvider>
+      <TaskWrapper />
   </React.StrictMode>
 );
 

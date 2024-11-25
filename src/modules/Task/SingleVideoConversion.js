@@ -1,9 +1,12 @@
+// src/modules/Task/SingleVideoConversion.js
+
 import React, { useEffect, useContext } from 'react';
-import { SingleTaskSettingsContext } from '../context/SingleTaskSettingsContext';
-import InfoIcon from '../components/InfoIcon';
+import { SingleTaskSettingsContext } from '../../context/SingleTaskSettingsContext';
+import InfoIcon from '../../components/InfoIcon';
 
 function SingleVideoConversion({ disabled }) {
   const {
+    taskEventNames,
     generalSettings,
     singleSettings,
     setSingleSettings,
@@ -55,7 +58,8 @@ function SingleVideoConversion({ disabled }) {
         selectedFile,
         outputFolder,
         generalSettings.cpuSelection.toString() || '0',
-        generalSettings.priorityLevel || 'normal'
+        generalSettings.priorityLevel || 'normal',
+        taskEventNames.eventNameSingleConversion
       );
       setSingleSettings((prevSettings) => ({
         ...prevSettings,

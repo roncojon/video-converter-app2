@@ -1,9 +1,11 @@
+// src/modules/Task/FolderVideoConversion.js
 import React, { useEffect, useContext } from 'react';
-import { SingleTaskSettingsContext } from '../context/SingleTaskSettingsContext';
-import InfoIcon from '../components/InfoIcon';
+import { SingleTaskSettingsContext } from '../../context/SingleTaskSettingsContext';
+import InfoIcon from '../../components/InfoIcon';
 
 function FolderVideoConversion({ disabled }) {
   const {
+    taskEventNames,
     generalSettings,
     folderSettings,
     setFolderSettings,
@@ -52,7 +54,8 @@ function FolderVideoConversion({ disabled }) {
         selectedFolder,
         outputFolder,
         generalSettings.cpuSelection.toString() || '0',
-        generalSettings.priorityLevel || 'normal'
+        generalSettings.priorityLevel || 'normal',
+        taskEventNames.eventNameFolderConversion
       );
       setFolderSettings((prevSettings) => ({
         ...prevSettings,

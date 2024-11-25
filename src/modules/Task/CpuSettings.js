@@ -1,6 +1,6 @@
-// src/modules/CpuSettings.js
+// src/modules/Task/CpuSettings.js
 import React, { useState, useEffect, useContext } from 'react';
-import { SingleTaskSettingsContext } from '../context/SingleTaskSettingsContext';
+import { SingleTaskSettingsContext } from '../../context/SingleTaskSettingsContext';
 
 function CpuSettings({disabled}) {
     const {

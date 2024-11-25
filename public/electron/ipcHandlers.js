@@ -41,15 +41,14 @@ function setupIpcHandlers() {
   });
 
   // Handler for generating HLS for a single file
-  ipcMain.handle('generate-hls', async (event, filePath, outputDir, cpuSelection, priorityLevel) => {
+  ipcMain.handle('generate-hls', async (event, filePath, outputDir, cpuSelection, priorityLevel, onProgressEventName) => {
     console.log('generate-hlscpuSelectioncpuSelection:', cpuSelection)
     console.log('generate-hlspriorityLevelpriorityLevel:', priorityLevel)
-    const isConvertingFolder = false;
-    return await convertVideoToHLS(event, filePath, outputDir, cpuSelection, priorityLevel, isConvertingFolder);
+    return await convertVideoToHLS(event, filePath, outputDir, cpuSelection, priorityLevel, onProgressEventName);
   });
 
   // New handler for generating HLS for all videos in a folder
-  ipcMain.handle('generate-hls-folder', async (event, folderPath, outputDir, cpuSelection, priorityLevel) => {
+  ipcMain.handle('generate-hls-folder', async (event, folderPath, outputDir, cpuSelection, priorityLevel, onProgressEventName) => {
     const videoFiles = fs.readdirSync(folderPath).filter(file => path.extname(file).toLowerCase() === '.mp4');
 
     if (videoFiles.length === 0) {
@@ -58,28 +57,13 @@ function setupIpcHandlers() {
 
     for (const file of videoFiles) {
       const filePath = path.join(folderPath, file);
-      try {
-        const isConvertingFolder = true;
-        await convertVideoToHLS(event, filePath, outputDir, cpuSelection, priorityLevel, isConvertingFolder);
-      } catch (error) {
-        event.sender.send(conversionProgress, { error: `Failed to convert ${file}: ${error.message}` });
-      }
+        await convertVideoToHLS(event, filePath, outputDir, cpuSelection, priorityLevel, onProgressEventName);
     }
 
     return `All videos in ${folderPath} have been converted to HLS.`;
   });
 
 }
-
-// // New handler for generating a preview video
-// ipcMain.handle('generate-preview-video', async (event, filePath, outputDir, previewDuration) => {
-//   try {
-//     const previewPath = await generatePreviewVideo(filePath, outputDir, previewDuration);
-//     return `Preview video created at ${previewPath}`;
-//   } catch (error) {
-//     return `Error generating preview video: ${error.message}`;
-//   }
-// });
 
 // Define log file path
 const logFilePath = path.join(__dirname, 'conversion_logs.txt');
@@ -90,8 +74,8 @@ function logToFile(message) {
 }
 
 // Helper function to convert a video to HLS format and generate thumbnails for .vtt
-async function convertVideoToHLS(event, filePath, outputDir, cpuSelection, priorityLevel, isConvertingFolder) {
-  const conversionProgress = isConvertingFolder ? "conversion-progress-folder" : "conversion-progress";
+async function convertVideoToHLS(event, filePath, outputDir, cpuSelection, priorityLevel, onProgressEventName) {
+  const conversionProgress = onProgressEventName;
   console.log('cpuSelectioncpuSelection:', cpuSelection)
   console.log('cpuSelectioncpuSelection:', cpuSelection)
   console.log('priorityLevelpriorityLevel:', priorityLevel)
@@ -165,15 +149,6 @@ async function convertVideoToHLS(event, filePath, outputDir, cpuSelection, prior
 
     // Set priority after the process starts
     setWindowsProcessPriority(ffmpegProcess.pid, priorityValue);
-
-    // ffmpegProcess.stderr.on('data', (data) => {
-    //   const output = data.toString();
-    //   const match = output.match(/frame=\s*(\d+)/);
-    //   if (match) {
-    //     const frameCount = parseInt(match[1], 10);
-    //     event.sender.send(conversionProgress, { resolution: res.label, frameCount });
-    //   }
-    // });
 
     console.log('totalFrames', totalFrames)
     ffmpegProcess.stderr.on('data', (data) => {

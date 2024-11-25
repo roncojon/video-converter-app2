@@ -1,3 +1,5 @@
+// src/modules/TaskQueue/FolderVideoConversion.js
+
 import React, { useState, useEffect } from 'react';
 import {
   DndContext,
@@ -25,7 +27,7 @@ const initialVideos = [
 ];
 
 // Main queue component
-const VideoQueue = () => {
+const TasksQueue = () => {
   const [videos, setVideos] = useState(initialVideos);
 
   const sensors = useSensors(
@@ -107,4 +109,4 @@ const VideoQueue = () => {
   );
 };
 
-export default VideoQueue;
+export default TasksQueue;
