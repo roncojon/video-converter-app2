@@ -15,7 +15,7 @@ function SingleVideoConversion({ disabled }) {
   const { tasks, addOrUpdateTask } = useContext(TasksQueueContext);
   const [isConfirmed, setIsConfirmed] = useState(false); // Track if the task is confirmed
 
-  const { selectedFile, outputFolder, outputText, progress } = singleSettings;
+  const { selectedFile, outputFolder, /* outputText, */ progress } = singleSettings;
 
   const handleSelectFile = async () => {
     setSingleSettings({
@@ -94,6 +94,14 @@ function SingleVideoConversion({ disabled }) {
     });
   };
 
+  // useEffect(() => {
+  //   if (tasks[taskId]?.status === 'in-progress'/* 'processing' */) {
+  //     handleConvertToHLS(); // Automatically trigger conversion when the task starts processing
+  //   }
+  // }, [tasks[taskId]?.status]);
+const outputText = tasks[taskId].outputText;
+
+console.log('tasks[taskId]',tasks[taskId])
   return (
     <>
       <div className="form-control mb-4 flex-row items-center gap-5 ">

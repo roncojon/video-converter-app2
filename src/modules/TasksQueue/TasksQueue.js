@@ -57,16 +57,29 @@ const TasksQueue = () => {
         addOrUpdateTask({ ...task, status: 'in-progress' }); // Mark task as in-progress
 
         try {
-          // Simulate task processing
-          await window.electronAPI.generateHls(
-            task.singleSettings.selectedFile,
-            task.singleSettings.outputFolder,
-            task.generalSettings.cpuSelection.toString() || '0',
-            task.generalSettings.priorityLevel || 'normal',
-            task.taskEventNames.eventNameSingleConversion
-          );
-
-          addOrUpdateTask({ ...task, status: 'completed' }); // Mark task as completed
+          let result = null;
+          if (task.activeTab === 'folder') {
+            console.log('task.taskEventNames.eventNameFolderConversion', task.taskEventNames.eventNameFolderConversion)
+            result = await window.electronAPI.generateHlsFolder(
+              task.folderSettings.selectedFolder,
+              task.folderSettings.outputFolder,
+              task.generalSettings.cpuSelection.toString() || '0',
+              task.generalSettings.priorityLevel || 'normal',
+              task.taskEventNames.eventNameFolderConversion
+            );
+          }
+          else {
+            // Simulate task processing
+            result = await window.electronAPI.generateHls(
+              task.singleSettings.selectedFile,
+              task.singleSettings.outputFolder,
+              task.generalSettings.cpuSelection.toString() || '0',
+              task.generalSettings.priorityLevel || 'normal',
+              task.taskEventNames.eventNameSingleConversion
+            );
+          }
+          console.log('resultresultresult', result)
+          addOrUpdateTask({ ...task, outputText: result, status: 'completed' }); // Mark task as completed
         } catch (error) {
           addOrUpdateTask({
             ...task,
@@ -111,15 +124,14 @@ const TasksQueue = () => {
               <div>
                 <p className="font-medium">{`Task: ${taskId}`}</p>
                 <p
-                  className={`badge ${
-                    tasks[taskId]?.status === 'completed'
-                      ? 'badge-success'
-                      : tasks[taskId]?.status === 'in-progress'
+                  className={`badge ${tasks[taskId]?.status === 'completed'
+                    ? 'badge-success'
+                    : tasks[taskId]?.status === 'in-progress'
                       ? 'badge-warning'
                       : tasks[taskId]?.status === 'confirmed'
-                      ? 'badge-info'
-                      : 'badge-error'
-                  }`}
+                        ? 'badge-info'
+                        : 'badge-error'
+                    }`}
                 >
                   {tasks[taskId]?.status || 'pending'}
                 </p>
@@ -137,9 +149,8 @@ const TasksQueue = () => {
 
             {/* Task Content (Always Mounted, Visibility Controlled) */}
             <div
-              className={`transition-all duration-300 ${
-                expandedTaskId === taskId ? 'block' : 'hidden'
-              }`}
+              className={`transition-all duration-300 ${expandedTaskId === taskId ? 'block' : 'hidden'
+                }`}
             >
               <div className="p-4 bg-base-100">
                 <TaskWrapper taskId={taskId} />
