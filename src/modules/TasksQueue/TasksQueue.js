@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { TasksQueueContext } from '../../contexts/TasksQueueContext';
 import TaskWrapper from '../Task/TaskWrapper';
 import { v4 as uuidv4 } from 'uuid';
@@ -48,50 +48,62 @@ const TasksQueue = () => {
     setExpandedTaskId(newTaskId); // Automatically expand the new task
   };
 
-  const handleStartConversion = async () => {
-    setIsProcessing(true);
+  const processTask = async (taskId) => {
+    const task = tasks[taskId];
+    if (!task || task.status !== 'confirmed') return;
 
-    for (const taskId of taskIds) {
-      const task = tasks[taskId];
-      if (task.status === 'confirmed') {
-        addOrUpdateTask({ ...task, status: 'in-progress' }); // Mark task as in-progress
+    addOrUpdateTask({ ...task, status: 'in-progress' }); // Mark task as in-progress
 
-        try {
-          let result = null;
-          if (task.activeTab === 'folder') {
-            console.log('task.taskEventNames.eventNameFolderConversion', task.taskEventNames.eventNameFolderConversion)
-            result = await window.electronAPI.generateHlsFolder(
-              task.folderSettings.selectedFolder,
-              task.folderSettings.outputFolder,
-              task.generalSettings.cpuSelection.toString() || '0',
-              task.generalSettings.priorityLevel || 'normal',
-              task.taskEventNames.eventNameFolderConversion
-            );
-          }
-          else {
-            // Simulate task processing
-            result = await window.electronAPI.generateHls(
-              task.singleSettings.selectedFile,
-              task.singleSettings.outputFolder,
-              task.generalSettings.cpuSelection.toString() || '0',
-              task.generalSettings.priorityLevel || 'normal',
-              task.taskEventNames.eventNameSingleConversion
-            );
-          }
-          console.log('resultresultresult', result)
-          addOrUpdateTask({ ...task, outputText: result, status: 'completed' }); // Mark task as completed
-        } catch (error) {
-          addOrUpdateTask({
-            ...task,
-            status: 'error',
-            errorMessage: error.message,
-          });
-        }
+    try {
+      let result = null;
+      if (task.activeTab === 'folder') {
+        result = await window.electronAPI.generateHlsFolder(
+          task.folderSettings.selectedFolder,
+          task.folderSettings.outputFolder,
+          task.generalSettings.cpuSelection.toString() || '0',
+          task.generalSettings.priorityLevel || 'normal',
+          task.taskEventNames.eventNameFolderConversion
+        );
+      } else {
+        result = await window.electronAPI.generateHls(
+          task.singleSettings.selectedFile,
+          task.singleSettings.outputFolder,
+          task.generalSettings.cpuSelection.toString() || '0',
+          task.generalSettings.priorityLevel || 'normal',
+          task.taskEventNames.eventNameSingleConversion
+        );
       }
-    }
 
-    setIsProcessing(false);
+      addOrUpdateTask({ ...task, outputText: result, status: 'completed' }); // Mark task as completed
+    } catch (error) {
+      addOrUpdateTask({
+        ...task,
+        status: 'error',
+        errorMessage: error.message,
+      });
+    }
   };
+
+  const handleStartConversion = () => {
+    setIsProcessing(true);
+  };
+
+  useEffect(() => {
+    const processQueue = async () => {
+      if (!isProcessing) return; // Only proceed if processing has been started
+
+      const inProgressTask = taskIds.find((id) => tasks[id]?.status === 'in-progress');
+      const nextTaskId = taskIds.find((id) => tasks[id]?.status === 'confirmed');
+
+      if (!inProgressTask && nextTaskId) {
+        await processTask(nextTaskId); // Process the next confirmed task
+      } else if (!inProgressTask && !nextTaskId) {
+        setIsProcessing(false); // Stop processing if no tasks remain
+      }
+    };
+
+    processQueue();
+  }, [tasks, isProcessing, taskIds]);
 
   return (
     <div className="container mx-auto p-4 bg-base-100 rounded-lg shadow">

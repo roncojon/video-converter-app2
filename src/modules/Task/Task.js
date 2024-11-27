@@ -64,15 +64,15 @@ function Task() {
   const disableTabs = isConvertingSingleVideo || isConvertingFolder;
 
   return (
-    <div className="min-h-screen bg-base-200 flex justify-center">
+    <div className=" bg-base-200 flex justify-center"> {/* min-h-screen */}
       <div className="card w-full bg-base-100 shadow-xl m-6">
         <div className="card-body">
-          <div className="flex justify-between items-center mb-4">
+          {/* <div className="flex justify-between items-center mb-4">
             <h1 className="card-title text-3xl font-bold text-center mb-1">
               Video Converter - {taskId}
             </h1>
             <ThemeSelector />
-          </div>
+          </div> */}
 
           {/* CPU and Priority Settings */}
           <CpuSettings disabled={disableTabs} />
@@ -89,9 +89,8 @@ function Task() {
           >
             <a
               role="tab"
-              className={`tab ${activeTab === 'single' ? 'tab-active' : ''} ${
-                disableTabs && activeTab !== 'single' ? 'tab-disabled' : ''
-              }`}
+              className={`tab ${activeTab === 'single' ? 'tab-active' : ''} ${disableTabs && activeTab !== 'single' ? 'tab-disabled' : ''
+                }`}
               onClick={() => !disableTabs && setActiveTab('single')}
               style={{
                 pointerEvents: disableTabs && activeTab !== 'single' ? 'none' : 'auto',
@@ -101,9 +100,8 @@ function Task() {
             </a>
             <a
               role="tab"
-              className={`tab ${activeTab === 'folder' ? 'tab-active' : ''} ${
-                disableTabs && activeTab !== 'folder' ? 'tab-disabled' : ''
-              }`}
+              className={`tab ${activeTab === 'folder' ? 'tab-active' : ''} ${disableTabs && activeTab !== 'folder' ? 'tab-disabled' : ''
+                }`}
               onClick={() => !disableTabs && setActiveTab('folder')}
               style={{
                 pointerEvents: disableTabs && activeTab !== 'folder' ? 'none' : 'auto',

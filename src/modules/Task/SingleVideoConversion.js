@@ -99,9 +99,9 @@ function SingleVideoConversion({ disabled }) {
   //     handleConvertToHLS(); // Automatically trigger conversion when the task starts processing
   //   }
   // }, [tasks[taskId]?.status]);
-const outputText = tasks[taskId].outputText;
+  const outputText = tasks[taskId].outputText;
 
-console.log('tasks[taskId]',tasks[taskId])
+  console.log('tasks[taskId]', tasks[taskId])
   return (
     <>
       <div className="form-control mb-4 flex-row items-center gap-5 ">
@@ -121,7 +121,7 @@ console.log('tasks[taskId]',tasks[taskId])
       <div className="form-control mb-8 flex-row items-center gap-5 ">
         <button
           onClick={handleSelectFolder}
-          className="btn btn-primary w-[240px]"
+          className="btn btn-primary w-[240px] shadow-md"
           disabled={disabled || isConfirmed}
         >
           Choose Output Folder
@@ -133,16 +133,32 @@ console.log('tasks[taskId]',tasks[taskId])
       </div>
 
       <div className="form-control mb-6 flex-row gap-5 ">
+        {/* <button
+          onClick={handleConfirmTask}
+          className="btn btn-accent w-[240px]"
+          disabled={disabled || !selectedFile || !outputFolder || isConfirmed} // Disable if file or folder is missing
+        >
+          {isConfirmed ? "Task Confirmed" : "Confirm Task"}
+        </button> */}
+
         {!isConfirmed ? (
           <button
             onClick={handleConfirmTask}
-            className="btn btn-accent w-[240px]"
+            className="btn btn-accent w-[240px] shadow-md"
             disabled={disabled || !selectedFile || !outputFolder} // Disable if file or folder is missing
           >
             Confirm Task
           </button>
         ) : (
-          <p className="text-gray-500">Task Confirmed</p>
+          // <button
+          //   onClick={handleConfirmTask}
+          //   className="btn btn-accent w-[240px] shadow-xl opacity-55"
+          //   // disabled={disabled || !selectedFile || !outputFolder} // Disable if file or folder is missing
+          // >
+          //   Task Confirmed
+          // </button>
+          // <p className="  w-[240px] min-w-[240px] flex-grow-0 flex justify-center font-bold  p-3 rounded-md shadow-md from-info-content"  >Task Confirmed</p>
+          <p className=" text-gray-500 overflow-auto whitespace-nowrap w-[240px] min-w-[240px] flex-grow-0 flex justify-center font-bold  p-3 rounded-md"  disabled>Task Confirmed</p>
         )}
 
         {outputText && (
