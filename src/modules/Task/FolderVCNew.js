@@ -13,10 +13,10 @@ function FolderVideoConversion({ disabled }) {
     taskId
   } = useContext(SingleTaskSettingsContext);
 
-  const { tasks, addOrUpdateTask } = useContext(TasksQueueContext);
+  const { addOrUpdateTask } = useContext(TasksQueueContext);
 
-  const { selectedFolder, outputFolder, /* outputTextArray, */ progress, converting } = folderSettings;
-console.log('folderSettingsfolderSettings',folderSettings)
+  const { selectedFolder, outputFolder, outputTextArray, progress, converting } = folderSettings;
+
   const handleSelectFolder = async () => {
     setFolderSettings({
       progress: {},
@@ -79,30 +79,26 @@ console.log('folderSettingsfolderSettings',folderSettings)
   };
 
   // Listen for task completion events to update the outputTextArray with the conversion result.
-  // useEffect(() => {
-  //   const handleTaskComplete = (event, data) => {
-  //     console.log('datadata', data);
-  //     console.log('eventevent', event);
-  //     if (data.taskId === taskId) {
-  //       setFolderSettings((prevSettings) => ({
-  //         ...prevSettings,
-  //         outputTextArray: data.outputText || "Conversion complete.",
-  //       }));
-  //     }
-  //   };
+  useEffect(() => {
+    const handleTaskComplete = (event, data) => {
+      if (data.taskId === taskId) {
+        setFolderSettings((prevSettings) => ({
+          ...prevSettings,
+          outputTextArray: data.outputText || "Conversion complete.",
+        }));
+      }
+    };
 
-  //   if (window.electronAPI && typeof window.electronAPI.receive === 'function') {
-  //     window.electronAPI.receive('task-complete', handleTaskComplete);
-  //   }
+    if (window.electronAPI && typeof window.electronAPI.receive === 'function') {
+      window.electronAPI.receive('task-complete', handleTaskComplete);
+    }
 
-  //   return () => {
-  //     if (window.electronAPI && typeof window.electronAPI.removeListener === 'function') {
-  //       window.electronAPI.removeListener('task-complete', handleTaskComplete);
-  //     }
-  //   };
-  // }, [taskId, setFolderSettings]);
-
-  const outputTextArray = tasks[taskId].outputText;
+    return () => {
+      if (window.electronAPI && typeof window.electronAPI.removeListener === 'function') {
+        window.electronAPI.removeListener('task-complete', handleTaskComplete);
+      }
+    };
+  }, [taskId, setFolderSettings]);
 
   return (
     <>
@@ -136,7 +132,7 @@ console.log('folderSettingsfolderSettings',folderSettings)
         <button
           onClick={handleConfirmTask}
           className="btn btn-accent w-[240px]"
-          disabled={disabled || converting /* || (outputTextArray === "Task confirmed and added to the queue.") */}
+          disabled={disabled || converting || (outputTextArray === "Task confirmed and added to the queue.")}
         >
           Confirm Task
         </button>
@@ -144,7 +140,7 @@ console.log('folderSettingsfolderSettings',folderSettings)
         {outputTextArray && (
           <div className="alert overflow-auto mt-[-4px]">
             <InfoIcon />
-            <span className="text-sm">{outputTextArray}</span>
+            <span className="text-sm">{converting ? "Task confirmed and added to the queue." : outputTextArray}</span>
           </div>
         )}
       </div>

@@ -73,8 +73,15 @@ const TasksQueue = () => {
           task.taskEventNames.eventNameSingleConversion
         );
       }
-
-      addOrUpdateTask({ ...task, outputText: result, status: 'completed' }); // Mark task as completed
+      addOrUpdateTask({
+        ...task,
+        outputText: result,
+        status: 'completed',
+        folderSettings: {
+          ...(task?.folderSettings ?? {}),
+          outputTextArray: result
+        },
+      }); // Mark task as completed
     } catch (error) {
       addOrUpdateTask({
         ...task,
