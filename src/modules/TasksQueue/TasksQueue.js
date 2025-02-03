@@ -137,7 +137,7 @@ const TasksQueue = () => {
           <li key={taskId} className="bg-base-100 rounded shadow">
             {/* Task Header */}
             <div
-              className="p-4 flex justify-between items-center cursor-pointer hover:bg-base-300"
+              className="p-4 flex justify-between items-center cursor-pointer hover:bg-base-300 shadow-md"
               onClick={() => toggleAccordion(taskId)}
             >
               <div>
