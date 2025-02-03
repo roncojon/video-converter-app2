@@ -113,7 +113,7 @@ const TasksQueue = () => {
   }, [tasks, isProcessing, taskIds]);
 
   return (
-    <div className="container mx-auto p-4 bg-base-100 rounded-lg shadow">
+    <div className="container mx-auto p-2  rounded-lg"> {/* bg-base-100 */}
       <h2 className="text-xl font-semibold mb-4">Tasks Queue</h2>
       <div className="flex justify-between mb-4">
         <button className="btn btn-primary" onClick={handleAddTask}>
@@ -134,7 +134,7 @@ const TasksQueue = () => {
           <p className="text-gray-500">No tasks in the queue.</p>
         )}
         {taskIds.map((taskId) => (
-          <li key={taskId} className="bg-base-200 rounded shadow">
+          <li key={taskId} className="bg-base-100 rounded shadow">
             {/* Task Header */}
             <div
               className="p-4 flex justify-between items-center cursor-pointer hover:bg-base-300"
@@ -171,7 +171,7 @@ const TasksQueue = () => {
               className={`transition-all duration-300 ${expandedTaskId === taskId ? 'block' : 'hidden'
                 }`}
             >
-              <div className="p-4 bg-base-100">
+              <div className="px-2 "> {/* bg-base-100 */}
                 <TaskWrapper taskId={taskId} />
               </div>
             </div>

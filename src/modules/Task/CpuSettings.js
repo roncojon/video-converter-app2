@@ -36,6 +36,7 @@ function CpuSettings({disabled}) {
 
     return (
         <div className="form-control mb-4">
+                  {/* {<div className="divider mt-0"></div>} */}
             <label className="label">
                 <span className="label-text">Select Number of CPUs to Use:</span>
             </label>

@@ -1,108 +1,19 @@
 // src/modules/Task/FolderVideoConversion.js
-import React, { useContext, useEffect } from 'react';
-import { SingleTaskSettingsContext } from '../../contexts/SingleTaskSettingsContext';
-import { TasksQueueContext } from '../../contexts/TasksQueueContext';
+import React from 'react';
 import InfoIcon from '../../components/InfoIcon';
+import { useFolderVideoConversion } from '../../hooks/useFolderVideoConversion';
 
 function FolderVideoConversion({ disabled }) {
   const {
-    taskEventNames,
-    generalSettings,
-    folderSettings,
-    setFolderSettings,
-    taskId
-  } = useContext(SingleTaskSettingsContext);
-
-  const { tasks, addOrUpdateTask } = useContext(TasksQueueContext);
-
-  const { selectedFolder, outputFolder, /* outputTextArray, */ progress, converting } = folderSettings;
-console.log('folderSettingsfolderSettings',folderSettings)
-  const handleSelectFolder = async () => {
-    setFolderSettings({
-      progress: {},
-      selectedFolder: null,
-      outputFolder: null,
-      outputTextArray: null,
-      converting: false,
-    });
-    const selectedFolderPath = await window.electronAPI.selectFolder();
-    setFolderSettings((prevSettings) => ({
-      ...prevSettings,
-      selectedFolder: selectedFolderPath,
-      outputFolder: prevSettings.outputFolder || selectedFolderPath,
-    }));
-  };
-
-  const handleSelectOutputFolder = async () => {
-    const selectedOutputPath = await window.electronAPI.selectFolder();
-    setFolderSettings((prevSettings) => ({
-      ...prevSettings,
-      outputFolder: selectedOutputPath,
-    }));
-  };
-
-  // Confirm the folder conversion task so the queue processor starts it when it's its turn.
-  const handleConfirmTask = () => {
-    if (!selectedFolder || !outputFolder) {
-      setFolderSettings((prevSettings) => ({
-        ...prevSettings,
-        outputTextArray: "Please select both a folder with videos and an output folder.",
-      }));
-      return;
-    }
-
-    // Indicate that confirmation is in progress.
-    setFolderSettings((prevSettings) => ({
-      ...prevSettings,
-      converting: true,
-    }));
-
-    // Build the updated task using the existing taskId.
-    const updatedTask = {
-      id: taskId,
-      taskEventNames,
-      activeTab: 'folder',
-      generalSettings,
-      folderSettings,
-      status: 'confirmed',
-    };
-
-    // Update the task in the global queue.
-    addOrUpdateTask(updatedTask);
-
-    // Update local state to show confirmation and disable the Confirm button.
-    // setFolderSettings((prevSettings) => ({
-    //   ...prevSettings,
-    //   converting: false,
-    //   outputTextArray: "Task confirmed and added to the queue.",
-    // }));
-  };
-
-  // Listen for task completion events to update the outputTextArray with the conversion result.
-  // useEffect(() => {
-  //   const handleTaskComplete = (event, data) => {
-  //     console.log('datadata', data);
-  //     console.log('eventevent', event);
-  //     if (data.taskId === taskId) {
-  //       setFolderSettings((prevSettings) => ({
-  //         ...prevSettings,
-  //         outputTextArray: data.outputText || "Conversion complete.",
-  //       }));
-  //     }
-  //   };
-
-  //   if (window.electronAPI && typeof window.electronAPI.receive === 'function') {
-  //     window.electronAPI.receive('task-complete', handleTaskComplete);
-  //   }
-
-  //   return () => {
-  //     if (window.electronAPI && typeof window.electronAPI.removeListener === 'function') {
-  //       window.electronAPI.removeListener('task-complete', handleTaskComplete);
-  //     }
-  //   };
-  // }, [taskId, setFolderSettings]);
-
-  const outputTextArray = tasks[taskId].outputText;
+    selectedFolder,
+    outputFolder,
+    progress,
+    converting,
+    outputTextArray,
+    handleSelectFolder,
+    handleSelectOutputFolder,
+    handleConfirmTask,
+  } = useFolderVideoConversion();
 
   return (
     <>
@@ -136,7 +47,7 @@ console.log('folderSettingsfolderSettings',folderSettings)
         <button
           onClick={handleConfirmTask}
           className="btn btn-accent w-[240px]"
-          disabled={disabled || converting /* || (outputTextArray === "Task confirmed and added to the queue.") */}
+          disabled={disabled || converting}
         >
           Confirm Task
         </button>

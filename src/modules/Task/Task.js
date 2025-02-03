@@ -64,20 +64,11 @@ function Task() {
   const disableTabs = isConvertingSingleVideo || isConvertingFolder;
 
   return (
-    <div className=" bg-base-200 flex justify-center"> {/* min-h-screen */}
-      <div className="card w-full bg-base-100 shadow-xl m-6">
-        <div className="card-body">
-          {/* <div className="flex justify-between items-center mb-4">
-            <h1 className="card-title text-3xl font-bold text-center mb-1">
-              Video Converter - {taskId}
-            </h1>
-            <ThemeSelector />
-          </div> */}
-
-          {/* CPU and Priority Settings */}
+    <div className="  flex justify-center"> {/* min-h-screen */} {/* bg-base-200 */}
+      <div className="card w-full bg-base-100  m-2"> {/* shadow-xl */}
+        <div className="card-body pt-0">
           <CpuSettings disabled={disableTabs} />
           <PrioritySettings disabled={disableTabs} />
-
           {/* Tabs */}
           <div
             role="tablist"
