@@ -113,7 +113,7 @@ const TasksQueue = () => {
   }, [tasks, isProcessing, taskIds]);
 
   return (
-    <div className="container mx-auto p-2  rounded-lg"> {/* bg-base-100 */}
+    <div className=" w-full mx-auto p-2  rounded-lg"> {/* container bg-base-100 */}
       <h2 className="text-xl font-semibold mb-4">Tasks Queue</h2>
       <div className="flex justify-between mb-4">
         <button className="btn btn-primary" onClick={handleAddTask}>
