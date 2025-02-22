@@ -38,7 +38,7 @@ function CpuSettings({disabled}) {
         <div className="form-control mb-4">
                   {/* {<div className="divider mt-0"></div>} */}
             <label className="label">
-                <span className="label-text">Select Number of CPUs to Use:</span>
+                <span className="label-text text-neutral">Select Number of CPUs to Use:</span>
             </label>
             <select value={selectedCpus} onChange={handleCpuChange} className="select select-bordered w-full" disabled={disabled}>
                 {[...Array(cpuCount).keys()].map(i => (

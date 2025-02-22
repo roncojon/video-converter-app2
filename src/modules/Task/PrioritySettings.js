@@ -18,7 +18,7 @@ function PrioritySettings({disabled}) {
   return (
     <div className="form-control mb-4">
       <label className="label">
-        <span className="label-text">Select Process Priority:</span>
+        <span className="label-text text-neutral">Select Process Priority:</span>
       </label>
       <select value={selectedPriority} onChange={handlePriorityChange} className="select select-bordered w-full" disabled={disabled}>
         <option value="low">Low</option>

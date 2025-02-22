@@ -134,7 +134,7 @@ const TasksQueue = () => {
           <p className="text-gray-500">No tasks in the queue.</p>
         )}
         {taskIds.map((taskId) => (
-          <li key={taskId} className="bg-base-100 rounded shadow">
+          <li key={taskId} className="bg-base-100 p-4 shadow-md rounded-lg flex items-center justify-between hover:bg-base-200">
             {/* Task Header */}
             <div
               className="p-4 flex justify-between items-center cursor-pointer hover:bg-base-300 shadow-md"

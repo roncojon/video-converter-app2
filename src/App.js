@@ -14,7 +14,7 @@ const App = () => {
 
         <header className="flex justify-between items-center mb-4 pr-1">
           <div className=' w-1'></div>
-          <h1 className="card-title text-2xl font-bold text-center mb-1">
+          <h1 className="card-title text-2xl font-bold text-neutral mb-1">
             Mp4 to HLS Video Converter {/* - {taskId} */}
           </h1>
           <ThemeSelector />

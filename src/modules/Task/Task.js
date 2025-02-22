@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 // src/modules/Task/Task.js
 import React, { useContext, useEffect } from 'react';
 import SingleVideoConversion from './SingleVideoConversion';
@@ -65,7 +66,7 @@ function Task() {
 
   return (
     <div className="  flex justify-center"> {/* min-h-screen */} {/* bg-base-200 */}
-      <div className="card w-full bg-base-100  m-2"> {/* shadow-xl */}
+      <div className="card w-full bg-base-100 m-2 shadow-md rounded-lg"> {/* shadow-xl */}
         <div className="card-body pt-0">
           <CpuSettings disabled={disableTabs} />
           <PrioritySettings disabled={disableTabs} />
