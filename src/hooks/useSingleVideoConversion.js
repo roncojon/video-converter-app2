@@ -21,6 +21,7 @@ export const useSingleVideoConversion = () => {
       selectedFile: null,
       outputFolder: null,
       outputText: null,
+      converting: false,
     });
     const selectedFilePath = await window.electronAPI.selectFile();
     setSingleSettings((prevSettings) => ({
@@ -44,12 +45,17 @@ export const useSingleVideoConversion = () => {
 
   // Logic to confirm the task and add it to the queue
   const handleConfirmTask = () => {
+    // (Optional) guard clause: button should already be disabled if either is missing
+    if (!selectedFile || !outputFolder) return;
+
+    const updatedSettings = { ...singleSettings, converting: true };
     setIsConfirmed(true);
+    setSingleSettings(updatedSettings);
     addOrUpdateTask({
       id: taskId,
       taskEventNames,
       generalSettings,
-      singleSettings,
+      singleSettings: updatedSettings,
       folderSettings: {}, // Not used for single conversion
       status: 'confirmed',
     });
