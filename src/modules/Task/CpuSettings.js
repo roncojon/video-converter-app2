@@ -35,7 +35,7 @@ function CpuSettings({disabled}) {
     const selectedCpus = generalSettings.cpuSelection;
 
     return (
-        <div className="form-control mb-4">
+        <div className="form-control mb-0">
                   {/* {<div className="divider mt-0"></div>} */}
             <label className="label">
                 <span className="label-text">Select Number of CPUs to Use:</span>
