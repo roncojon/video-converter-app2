@@ -44,21 +44,29 @@ function FolderVideoConversion({ disabled }) {
       </div>
 
       <div className="form-control mb-6 flex-row gap-5">
-        <button
-          onClick={handleConfirmTask}
-          className="btn btn-accent w-[240px]"
-          disabled={disabled || converting}
-        >
-          Confirm Task
-        </button>
+  {!converting ? (
+    <button
+      onClick={handleConfirmTask}
+      className="btn btn-accent w-[240px] shadow-md"
+      disabled={disabled || !selectedFolder || !outputFolder}
+    >
+      Confirm Task
+    </button>
+  ) : (
+    <p
+      className="text-gray-500 overflow-auto whitespace-nowrap w-[240px] min-w-[240px] flex-grow-0 flex justify-center font-bold p-3 rounded-md"
+    >
+      Task Confirmed
+    </p>
+  )}
 
-        {outputTextArray && (
-          <div className="alert overflow-auto mt-[-4px]">
-            <InfoIcon />
-            <span className="text-sm">{outputTextArray}</span>
-          </div>
-        )}
-      </div>
+  {outputTextArray && (
+    <div className="alert overflow-auto mt-[-4px]">
+      <InfoIcon />
+      <span className="text-sm">{outputTextArray}</span>
+    </div>
+  )}
+</div>
 
       {Object.keys(progress).length > 0 && (
         <div className="w-full">
