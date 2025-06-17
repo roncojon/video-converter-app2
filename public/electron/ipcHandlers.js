@@ -184,7 +184,7 @@ async function convertVideoToHLS(event, filePath, outputDir, cpuSelection, prior
 
   // Generate Thumbnails and .vtt file
   try {
-    const vttFilePath = await generateThumbnails(filePath, videoOutputDir, 5); // Adjust interval as desired
+    const vttFilePath = await generateFrameImages(filePath, videoOutputDir, 5); // Adjust interval as desired
     event.sender.send('thumbnail-progress', { message: `Thumbnails and VTT file created: ${vttFilePath}` });
   } catch (error) {
     console.error("Error generating thumbnails:", error);
@@ -202,7 +202,7 @@ async function convertVideoToHLS(event, filePath, outputDir, cpuSelection, prior
 
   // Generate HD and low-resolution images from 40% of video duration
   try {
-    const [hdImagePath, lowResImagePath] = await generateFrameImages(filePath, videoOutputDir);
+    const [hdImagePath, lowResImagePath] = await generateThumbnails(filePath, videoOutputDir);
     event.sender.send('frame-images-progress', {
       message: `HD and low-res images created at: ${hdImagePath}, ${lowResImagePath}`
     });
@@ -222,6 +222,11 @@ async function convertVideoToHLS(event, filePath, outputDir, cpuSelection, prior
     console.error("Error generating preview video:", error);
     logToFile(`Error generating preview video: ${error.message}`);
   }
+  event.sender.send(conversionProgress, {
+    videoName: path.basename(filePath), // Keep context for the UI
+    percentage: 100,
+    resolution: 'Completed', // Provide a clear final status
+  });
 
   return `Master playlist, preview, VTT file, extra info, and frame images created at ${masterPlaylistPath}`;
 }

@@ -25,3 +25,7 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+
+# Added by Better Context to AI
+FILE_CONTENT_MAP.md

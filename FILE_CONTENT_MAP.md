@@ -1,8 +1,108 @@
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/public/electron/conversion_logs.txt":
-// [Content omitted]
+<!-- "d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/package.json": -->
+{
+  "name": "video-converter-app",
+  "version": "0.1.0",
+  "description": "A video converter application using Electron and React.",
+  "author": "Your Name",
+  "private": true,
+  "homepage": ".",
+  "main": "public/electron/electron.js",
+  "dependencies": {
+    "@dnd-kit/core": "^6.2.0",
+    "@dnd-kit/modifiers": "^8.0.0",
+    "@dnd-kit/sortable": "^9.0.0",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "daisyui": "^4.12.13",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-scripts": "5.0.1",
+    "uuid": "^11.0.3",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "concurrently \"react-scripts start\" \"electron .\"",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "electron-build": "electron-builder"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.20",
+    "concurrently": "^9.0.1",
+    "electron": "^33.0.2",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.14"
+  },
+  "build": {
+    "appId": "com.yourcompany.video-converter-app",
+    "productName": "Video Converter App",
+    "directories": {
+      "buildResources": "assets"
+    },
+    "files": [
+      "build/**/*",
+      "public/electron/**/*",
+      "public/ffmpeg/**/*",
+      "node_modules/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "public/ffmpeg",
+        "to": "ffmpeg",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "extraMetadata": {
+      "main": "public/electron/electron.js"
+    },
+    "win": {
+      "target": [
+        "portable"
+      ]
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  }
+}
 
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/public/electron/electron.js":
-// const { app, BrowserWindow, ipcMain } = require('electron');
+
+<!-- "d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/postcss.config.js": -->
+module.exports = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}
+
+
+<!-- "d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/public/electron/electron.js": -->
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const { setupIpcHandlers } = require('./ipcHandlers'); // Import the IPC handlers setup function
 
@@ -34,8 +134,8 @@ app.on('ready', () => {
 });
 
 
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/public/electron/ffmpegUtils.js":
-// // public/electron/ffmpegUtils.js
+<!-- "d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/public/electron/ffmpegUtils.js": -->
+// public/electron/ffmpegUtils.js
 
 const path = require('path');
 const { execFile, execSync } = require('child_process');
@@ -397,8 +497,8 @@ module.exports = {
 
 
 
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/public/electron/ipcHandlers.js":
-// // public/electron/ipcHandlers.js
+<!-- "d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/public/electron/ipcHandlers.js": -->
+// public/electron/ipcHandlers.js
 // Import required modules at the top
 const { ipcMain, dialog } = require('electron');
 const fs = require('fs');
@@ -584,7 +684,7 @@ async function convertVideoToHLS(event, filePath, outputDir, cpuSelection, prior
 
   // Generate Thumbnails and .vtt file
   try {
-    const vttFilePath = await generateThumbnails(filePath, videoOutputDir, 5); // Adjust interval as desired
+    const vttFilePath = await generateFrameImages(filePath, videoOutputDir, 5); // Adjust interval as desired
     event.sender.send('thumbnail-progress', { message: `Thumbnails and VTT file created: ${vttFilePath}` });
   } catch (error) {
     console.error("Error generating thumbnails:", error);
@@ -602,7 +702,7 @@ async function convertVideoToHLS(event, filePath, outputDir, cpuSelection, prior
 
   // Generate HD and low-resolution images from 40% of video duration
   try {
-    const [hdImagePath, lowResImagePath] = await generateFrameImages(filePath, videoOutputDir);
+    const [hdImagePath, lowResImagePath] = await generateThumbnails(filePath, videoOutputDir);
     event.sender.send('frame-images-progress', {
       message: `HD and low-res images created at: ${hdImagePath}, ${lowResImagePath}`
     });
@@ -622,6 +722,11 @@ async function convertVideoToHLS(event, filePath, outputDir, cpuSelection, prior
     console.error("Error generating preview video:", error);
     logToFile(`Error generating preview video: ${error.message}`);
   }
+  event.sender.send(conversionProgress, {
+    videoName: path.basename(filePath), // Keep context for the UI
+    percentage: 100,
+    resolution: 'Completed', // Provide a clear final status
+  });
 
   return `Master playlist, preview, VTT file, extra info, and frame images created at ${masterPlaylistPath}`;
 }
@@ -630,8 +735,8 @@ async function convertVideoToHLS(event, filePath, outputDir, cpuSelection, prior
 module.exports = { setupIpcHandlers };
 
 
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/public/electron/preload.js":
-// // public/electron/preload.js
+<!-- "d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/public/electron/preload.js": -->
+// public/electron/preload.js
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
@@ -645,17 +750,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
 });
 
 
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/public/favicon.ico":
-// [Content omitted]
-
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/public/ffmpeg/ffmpeg.exe":
-// [File too large, omitted]
-
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/public/ffmpeg/ffprobe.exe":
-// [File too large, omitted]
-
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/public/index.html":
-// <!DOCTYPE html>
+<!-- "d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/public/index.html": -->
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -700,14 +796,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
 </html>
 
 
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/public/logo192.png":
-// [Content omitted]
-
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/public/logo512.png":
-// [Content omitted]
-
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/public/manifest.json":
-// {
+<!-- "d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/public/manifest.json": -->
+{
   "short_name": "Mp4 to HLS Video Converter",
   "name": "Mp4 to HLS Video Converter",
   "icons": [
@@ -734,11 +824,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
 }
 
 
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/public/robots.txt":
-// [Content omitted]
-
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/App.css":
-// .App {
+<!-- "d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/App.css": -->
+.App {
   text-align: center;
 }
 
@@ -783,8 +870,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
 }
 
 
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/App.js":
-// import React from 'react';
+<!-- "d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/App.js": -->
+import React from 'react';
 import { TasksQueueContextProvider } from './contexts/TasksQueueContext';
 import TasksQueue from './modules/TasksQueue/TasksQueue';
 import ThemeSelector from './components/ThemeSelector';
@@ -828,8 +915,8 @@ const App = () => {
 export default App;
 
 
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/components/InfoIcon.js":
-// import React from 'react'
+<!-- "d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/components/InfoIcon.js": -->
+import React from 'react'
 
 const InfoIcon = () => {
   return (
@@ -849,8 +936,8 @@ const InfoIcon = () => {
 
 export default InfoIcon
 
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/components/ThemeSelector.js":
-// import React from 'react'
+<!-- "d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/components/ThemeSelector.js": -->
+import React from 'react'
 
 const ThemeSelector = () => {
     return (
@@ -881,8 +968,8 @@ const ThemeSelector = () => {
 
 export default ThemeSelector
 
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/contexts/SingleTaskSettingsContext.js":
-// // src/contexts/SingleTaskSettingsContext.js
+<!-- "d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/contexts/SingleTaskSettingsContext.js": -->
+// src/contexts/SingleTaskSettingsContext.js
 import React, { createContext, useState } from 'react';
 
 export const SingleTaskSettingsContext = createContext();
@@ -938,8 +1025,8 @@ export function SettingsProvider({ children, taskId}) {
 }
 
 
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/contexts/TaskQueueContextExample.js":
-//  // Initial mock tasks for testing
+<!-- "d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/contexts/TaskQueueContextExample.js": -->
+ // Initial mock tasks for testing
  const initialTasks = {
     'task-1': {
       taskId: 'task-1',
@@ -1024,8 +1111,8 @@ export function SettingsProvider({ children, taskId}) {
     },
   };
 
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/contexts/TasksQueueContext.js":
-// import React, { createContext, useState } from 'react';
+<!-- "d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/contexts/TasksQueueContext.js": -->
+import React, { createContext, useState } from 'react';
 
 export const TasksQueueContext = createContext();
 
@@ -1069,8 +1156,8 @@ export function TasksQueueContextProvider({ children }) {
 }
 
 
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/hooks/useFolderVideoConversion.js":
-// // src/hooks/useFolderVideoConversion.js
+<!-- "d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/hooks/useFolderVideoConversion.js": -->
+// src/hooks/useFolderVideoConversion.js
 import { useContext } from 'react';
 import { SingleTaskSettingsContext } from '../contexts/SingleTaskSettingsContext';
 import { TasksQueueContext } from '../contexts/TasksQueueContext';
@@ -1155,8 +1242,8 @@ export const useFolderVideoConversion = () => {
 };
 
 
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/hooks/useSingleVideoConversion.js":
-// // src/hooks/useSingleVideoConversion.js
+<!-- "d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/hooks/useSingleVideoConversion.js": -->
+// src/hooks/useSingleVideoConversion.js
 import { useContext, useState } from 'react';
 import { SingleTaskSettingsContext } from '../contexts/SingleTaskSettingsContext';
 import { TasksQueueContext } from '../contexts/TasksQueueContext';
@@ -1179,6 +1266,7 @@ export const useSingleVideoConversion = () => {
       selectedFile: null,
       outputFolder: null,
       outputText: null,
+      converting: false,
     });
     const selectedFilePath = await window.electronAPI.selectFile();
     setSingleSettings((prevSettings) => ({
@@ -1202,12 +1290,17 @@ export const useSingleVideoConversion = () => {
 
   // Logic to confirm the task and add it to the queue
   const handleConfirmTask = () => {
+    // (Optional) guard clause: button should already be disabled if either is missing
+    if (!selectedFile || !outputFolder) return;
+
+    const updatedSettings = { ...singleSettings, converting: true };
     setIsConfirmed(true);
+    setSingleSettings(updatedSettings);
     addOrUpdateTask({
       id: taskId,
       taskEventNames,
       generalSettings,
-      singleSettings,
+      singleSettings: updatedSettings,
       folderSettings: {}, // Not used for single conversion
       status: 'confirmed',
     });
@@ -1226,8 +1319,8 @@ export const useSingleVideoConversion = () => {
 };
 
 
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/index.css":
-// /* src/index.css */
+<!-- "d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/index.css": -->
+/* src/index.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -1249,8 +1342,8 @@ code {
     monospace;
 }
 
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/index.js":
-// import React from 'react';
+<!-- "d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/index.js": -->
+import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
@@ -1269,700 +1362,8 @@ root.render(
 reportWebVitals();
 
 
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/logo.svg":
-// <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 841.9 595.3"><g fill="#61DAFB"><path d="M666.3 296.5c0-32.5-40.7-63.3-103.1-82.4 14.4-63.6 8-114.2-20.2-130.4-6.5-3.8-14.1-5.6-22.4-5.6v22.3c4.6 0 8.3.9 11.4 2.6 13.6 7.8 19.5 37.5 14.9 75.7-1.1 9.4-2.9 19.3-5.1 29.4-19.6-4.8-41-8.5-63.5-10.9-13.5-18.5-27.5-35.3-41.6-50 32.6-30.3 63.2-46.9 84-46.9V78c-27.5 0-63.5 19.6-99.9 53.6-36.4-33.8-72.4-53.2-99.9-53.2v22.3c20.7 0 51.4 16.5 84 46.6-14 14.7-28 31.4-41.3 49.9-22.6 2.4-44 6.1-63.6 11-2.3-10-4-19.7-5.2-29-4.7-38.2 1.1-67.9 14.6-75.8 3-1.8 6.9-2.6 11.5-2.6V78.5c-8.4 0-16 1.8-22.6 5.6-28.1 16.2-34.4 66.7-19.9 130.1-62.2 19.2-102.7 49.9-102.7 82.3 0 32.5 40.7 63.3 103.1 82.4-14.4 63.6-8 114.2 20.2 130.4 6.5 3.8 14.1 5.6 22.5 5.6 27.5 0 63.5-19.6 99.9-53.6 36.4 33.8 72.4 53.2 99.9 53.2 8.4 0 16-1.8 22.6-5.6 28.1-16.2 34.4-66.7 19.9-130.1 62-19.1 102.5-49.9 102.5-82.3zm-130.2-66.7c-3.7 12.9-8.3 26.2-13.5 39.5-4.1-8-8.4-16-13.1-24-4.6-8-9.5-15.8-14.4-23.4 14.2 2.1 27.9 4.7 41 7.9zm-45.8 106.5c-7.8 13.5-15.8 26.3-24.1 38.2-14.9 1.3-30 2-45.2 2-15.1 0-30.2-.7-45-1.9-8.3-11.9-16.4-24.6-24.2-38-7.6-13.1-14.5-26.4-20.8-39.8 6.2-13.4 13.2-26.8 20.7-39.9 7.8-13.5 15.8-26.3 24.1-38.2 14.9-1.3 30-2 45.2-2 15.1 0 30.2.7 45 1.9 8.3 11.9 16.4 24.6 24.2 38 7.6 13.1 14.5 26.4 20.8 39.8-6.3 13.4-13.2 26.8-20.7 39.9zm32.3-13c5.4 13.4 10 26.8 13.8 39.8-13.1 3.2-26.9 5.9-41.2 8 4.9-7.7 9.8-15.6 14.4-23.7 4.6-8 8.9-16.1 13-24.1zM421.2 430c-9.3-9.6-18.6-20.3-27.8-32 9 .4 18.2.7 27.5.7 9.4 0 18.7-.2 27.8-.7-9 11.7-18.3 22.4-27.5 32zm-74.4-58.9c-14.2-2.1-27.9-4.7-41-7.9 3.7-12.9 8.3-26.2 13.5-39.5 4.1 8 8.4 16 13.1 24 4.7 8 9.5 15.8 14.4 23.4zM420.7 163c9.3 9.6 18.6 20.3 27.8 32-9-.4-18.2-.7-27.5-.7-9.4 0-18.7.2-27.8.7 9-11.7 18.3-22.4 27.5-32zm-74 58.9c-4.9 7.7-9.8 15.6-14.4 23.7-4.6 8-8.9 16-13 24-5.4-13.4-10-26.8-13.8-39.8 13.1-3.1 26.9-5.8 41.2-7.9zm-90.5 125.2c-35.4-15.1-58.3-34.9-58.3-50.6 0-15.7 22.9-35.6 58.3-50.6 8.6-3.7 18-7 27.7-10.1 5.7 19.6 13.2 40 22.5 60.9-9.2 20.8-16.6 41.1-22.2 60.6-9.9-3.1-19.3-6.5-28-10.2zM310 490c-13.6-7.8-19.5-37.5-14.9-75.7 1.1-9.4 2.9-19.3 5.1-29.4 19.6 4.8 41 8.5 63.5 10.9 13.5 18.5 27.5 35.3 41.6 50-32.6 30.3-63.2 46.9-84 46.9-4.5-.1-8.3-1-11.3-2.7zm237.2-76.2c4.7 38.2-1.1 67.9-14.6 75.8-3 1.8-6.9 2.6-11.5 2.6-20.7 0-51.4-16.5-84-46.6 14-14.7 28-31.4 41.3-49.9 22.6-2.4 44-6.1 63.6-11 2.3 10.1 4.1 19.8 5.2 29.1zm38.5-66.7c-8.6 3.7-18 7-27.7 10.1-5.7-19.6-13.2-40-22.5-60.9 9.2-20.8 16.6-41.1 22.2-60.6 9.9 3.1 19.3 6.5 28.1 10.2 35.4 15.1 58.3 34.9 58.3 50.6-.1 15.7-23 35.6-58.4 50.6zM320.8 78.4z"/><circle cx="420.9" cy="296.5" r="45.7"/><path d="M520.5 78.1z"/></g></svg>
-
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/modules/Task/CpuSettings.js":
-// // src/modules/Task/CpuSettings.js
-import React, { useState, useEffect, useContext } from 'react';
-import { SingleTaskSettingsContext } from '../../contexts/SingleTaskSettingsContext';
-
-function CpuSettings({disabled}) {
-    const {
-        generalSettings, 
-        setGeneralSettings,
-      } = useContext(SingleTaskSettingsContext);
-
-    const [cpuCount, setCpuCount] = useState(0);
-
-    useEffect(() => {
-        // Fetch the number of available CPUs from the Electron backend
-        const fetchCpuCount = async () => {
-            try {
-                const count = await window.electronAPI.getCpuCount();
-                console.log('CpuSettingsCount:', count);
-                setCpuCount(count);
-                setGeneralSettings({ ...generalSettings, cpuSelection: count });
-            } catch (error) {
-                console.log('CpuSettingsError:', error)
-            }
-
-        };
-        fetchCpuCount();
-    }, []);
-
-    const handleCpuChange = (event) => {
-        const value = parseInt(event.target.value, 10);
-        // setSelectedCpus(value);
-        setGeneralSettings({ ...generalSettings, cpuSelection: value });
-    };
-
-    const selectedCpus = generalSettings.cpuSelection;
-
-    return (
-        <div className="form-control mb-4">
-                  {/* {<div className="divider mt-0"></div>} */}
-            <label className="label">
-                <span className="label-text">Select Number of CPUs to Use:</span>
-            </label>
-            <select value={selectedCpus} onChange={handleCpuChange} className="select select-bordered w-full" disabled={disabled}>
-                {[...Array(cpuCount).keys()].map(i => (
-                    <option key={i + 1} value={i + 1}>
-                        {i + 1} CPU{i + 1 > 1 ? 's' : ''}
-                    </option>
-                ))}
-            </select>
-        </div>
-    );
-}
-
-export default CpuSettings;
-
-
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/modules/Task/FolderVideoConversion.js":
-// // src/modules/Task/FolderVideoConversion.js
-import React from 'react';
-import InfoIcon from '../../components/InfoIcon';
-import { useFolderVideoConversion } from '../../hooks/useFolderVideoConversion';
-
-function FolderVideoConversion({ disabled }) {
-  const {
-    selectedFolder,
-    outputFolder,
-    progress,
-    converting,
-    outputTextArray,
-    handleSelectFolder,
-    handleSelectOutputFolder,
-    handleConfirmTask,
-  } = useFolderVideoConversion();
-
-  return (
-    <>
-      <div className="form-control mb-4 flex-row items-center gap-5">
-        <button
-          onClick={handleSelectFolder}
-          className="btn btn-primary w-[240px]"
-          disabled={disabled}
-        >
-          Choose Folder with Videos
-        </button>
-        <p className="text-sm text-gray-500 overflow-auto whitespace-nowrap">
-          <span className="font-semibold">Selected folder:</span> {selectedFolder || "None"}
-        </p>
-      </div>
-
-      <div className="form-control mb-8 flex-row items-center gap-5">
-        <button
-          onClick={handleSelectOutputFolder}
-          className="btn btn-primary w-[240px]"
-          disabled={disabled}
-        >
-          Choose Output Folder
-        </button>
-        <p className="text-sm text-gray-500 overflow-auto whitespace-nowrap">
-          <span className="font-semibold">Output folder:</span> {outputFolder || "None"}
-        </p>
-      </div>
-
-      <div className="form-control mb-6 flex-row gap-5">
-        <button
-          onClick={handleConfirmTask}
-          className="btn btn-accent w-[240px]"
-          disabled={disabled || converting}
-        >
-          Confirm Task
-        </button>
-
-        {outputTextArray && (
-          <div className="alert overflow-auto mt-[-4px]">
-            <InfoIcon />
-            <span className="text-sm">{outputTextArray}</span>
-          </div>
-        )}
-      </div>
-
-      {Object.keys(progress).length > 0 && (
-        <div className="w-full">
-          <ul className="space-y-6">
-            {Object.entries(progress).map(([videoName, videoProgress]) => (
-              <>
-                {videoName && videoName !== "undefined" ? (
-                  <li key={videoName} className="text-sm border-b pb-4">
-                    <div className="mb-2 overflow-auto">
-                      <span className="font-bold">{videoName}:</span>
-                      <span> {videoProgress?.percentage?.toFixed(2)}%</span>
-                    </div>
-                    <div className="mb-2">
-                      <span className="font-semibold">Current Resolution:</span>{" "}
-                      <span>{videoProgress?.resolution || "Unknown"}</span>
-                    </div>
-                    <progress
-                      className="progress progress-accent w-full"
-                      value={videoProgress?.percentage}
-                      max="100"
-                    ></progress>
-                  </li>
-                ) : null}
-              </>
-            ))}
-          </ul>
-        </div>
-      )}
-    </>
-  );
-}
-
-export default FolderVideoConversion;
-
-
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/modules/Task/PrioritySettings.js":
-// // src/modules/Task/PrioritySettings.js
-import React, { useContext, useState } from 'react';
-import { SingleTaskSettingsContext } from '../../contexts/SingleTaskSettingsContext';
-
-function PrioritySettings({disabled}) {
-  const {
-    generalSettings, 
-    setGeneralSettings,
-  } = useContext(SingleTaskSettingsContext);
-
-  const handlePriorityChange = (event) => {
-    const priority = event.target.value;
-    setGeneralSettings({ ...generalSettings, priorityLevel: priority });
-  };
-
-  const selectedPriority = generalSettings.priorityLevel;
-
-  return (
-    <div className="form-control mb-4">
-      <label className="label">
-        <span className="label-text">Select Process Priority:</span>
-      </label>
-      <select value={selectedPriority} onChange={handlePriorityChange} className="select select-bordered w-full" disabled={disabled}>
-        <option value="low">Low</option>
-        <option value="normal">Normal</option>
-        <option value="high">High</option>
-      </select>
-    </div>
-  );
-}
-
-export default PrioritySettings;
-
-
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/modules/Task/SingleVideoConversion.js":
-// // src/modules/Task/SingleVideoConversion.js
-import React from 'react';
-import InfoIcon from '../../components/InfoIcon';
-import { useSingleVideoConversion } from '../../hooks/useSingleVideoConversion';
-
-const SingleVideoConversion = ({ disabled }) => {
-  const {
-    isConfirmed,
-    selectedFile,
-    outputFolder,
-    progress,
-    outputText,
-    handleSelectFile,
-    handleSelectFolder,
-    handleConfirmTask,
-  } = useSingleVideoConversion();
-
-  return (
-    <>
-      <div className="form-control mb-4 flex-row items-center gap-5">
-        <button
-          onClick={handleSelectFile}
-          className="btn btn-primary w-[240px]"
-          disabled={disabled || isConfirmed}
-        >
-          Choose File
-        </button>
-        <p className="text-sm text-gray-500 overflow-auto whitespace-nowrap">
-          <span className="font-semibold">Selected file:</span>{' '}
-          {selectedFile || 'None'}
-        </p>
-      </div>
-
-      <div className="form-control mb-8 flex-row items-center gap-5">
-        <button
-          onClick={handleSelectFolder}
-          className="btn btn-primary w-[240px] shadow-md"
-          disabled={disabled || isConfirmed}
-        >
-          Choose Output Folder
-        </button>
-        <p className="text-sm text-gray-500 overflow-auto whitespace-nowrap">
-          <span className="font-semibold">Output folder:</span>{' '}
-          {outputFolder || 'None'}
-        </p>
-      </div>
-
-      <div className="form-control mb-6 flex-row gap-5">
-        {!isConfirmed ? (
-          <button
-            onClick={handleConfirmTask}
-            className="btn btn-accent w-[240px] shadow-md"
-            disabled={disabled || !selectedFile || !outputFolder}
-          >
-            Confirm Task
-          </button>
-        ) : (
-          <p
-            className="text-gray-500 overflow-auto whitespace-nowrap w-[240px] min-w-[240px] flex-grow-0 flex justify-center font-bold p-3 rounded-md"
-            disabled
-          >
-            Task Confirmed
-          </p>
-        )}
-
-        {outputText && (
-          <div role="alert" className="alert overflow-auto mt-[-4px]">
-            <InfoIcon />
-            <span className="text-sm">{outputText}</span>
-          </div>
-        )}
-      </div>
-
-      {progress?.percentage !== undefined && (
-        <div className="w-full">
-          <ul className="space-y-6">
-            <li key={progress.videoName} className="text-sm border-b pb-4">
-              <div className="text-sm mb-2 overflow-auto">
-                <span className="font-bold">{progress.videoName}:</span>
-                <span> {progress?.percentage?.toFixed(2)}%</span>
-              </div>
-              <div className="text-sm mb-2">
-                <span className="font-semibold">Current Resolution:</span>{' '}
-                <span>{progress?.resolution || 'Unknown'}</span>
-              </div>
-              <progress
-                className="progress progress-accent w-full"
-                value={progress?.percentage}
-                max="100"
-              ></progress>
-            </li>
-          </ul>
-        </div>
-      )}
-    </>
-  );
-};
-
-export default SingleVideoConversion;
-
-
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/modules/Task/Task.js":
-// // src/modules/Task/Task.js
-import React, { useContext, useEffect } from 'react';
-import SingleVideoConversion from './SingleVideoConversion';
-import FolderVideoConversion from './FolderVideoConversion';
-import PrioritySettings from './PrioritySettings';
-import CpuSettings from './CpuSettings';
-import { SingleTaskSettingsContext } from '../../contexts/SingleTaskSettingsContext';
-import ThemeSelector from '../../components/ThemeSelector';
-
-function Task() {
-  const {
-    taskId, // Access taskId from context
-    taskEventNames,
-    activeTab,
-    setActiveTab,
-    singleSettings,
-    setSingleSettings,
-    folderSettings,
-    setFolderSettings,
-  } = useContext(SingleTaskSettingsContext);
-
-  // Handle progress updates from Electron
-  useEffect(() => {
-    const handleProgressSingle = (event, progressData) => {
-      setSingleSettings((prevSettings) => ({
-        ...prevSettings,
-        progress: {
-          videoName: progressData.videoName, // Save video name
-          resolution: progressData.resolution, // Current resolution being converted
-          percentage: progressData.percentage, // Overall percentage
-        },
-      }));
-    };
-
-    const handleProgressFolder = (event, progressData) => {
-      const { videoName, percentage, resolution } = progressData;
-
-      setFolderSettings((prevSettings) => ({
-        ...prevSettings,
-        progress: {
-          ...prevSettings.progress,
-          [videoName]: {
-            ...prevSettings.progress[videoName], // Keep existing progress for this video
-            percentage, // Update overall percentage
-            resolution, // Update current resolution
-          },
-        },
-      }));
-    };
-
-    // Listen to progress updates for this specific task
-    window.electronAPI.onProgress(taskEventNames.eventNameSingleConversion, handleProgressSingle);
-    window.electronAPI.onProgress(taskEventNames.eventNameFolderConversion, handleProgressFolder);
-
-    // Cleanup listeners on unmount
-    return () => {
-      window.electronAPI.offProgress(taskEventNames.eventNameSingleConversion, handleProgressSingle);
-      window.electronAPI.offProgress(taskEventNames.eventNameFolderConversion, handleProgressFolder);
-    };
-  }, [taskId]); // Include taskId to ensure updates are tied to this specific task
-
-  const isConvertingSingleVideo = singleSettings?.converting;
-  const isConvertingFolder = folderSettings?.converting;
-  const disableTabs = isConvertingSingleVideo || isConvertingFolder;
-
-  return (
-    <div className="  flex justify-center"> {/* min-h-screen */} {/* bg-base-200 */}
-      <div className="card w-full bg-base-100  m-2"> {/* shadow-xl */}
-        <div className="card-body pt-0">
-          <CpuSettings disabled={disableTabs} />
-          <PrioritySettings disabled={disableTabs} />
-          {/* Tabs */}
-          <div
-            role="tablist"
-            className="tabs tabs-lifted w-full"
-            style={{
-              boxSizing: 'border-box',
-              '--tab-border': '2px',
-            }}
-          >
-            <a
-              role="tab"
-              className={`tab ${activeTab === 'single' ? 'tab-active' : ''} ${disableTabs && activeTab !== 'single' ? 'tab-disabled' : ''
-                }`}
-              onClick={() => !disableTabs && setActiveTab('single')}
-              style={{
-                pointerEvents: disableTabs && activeTab !== 'single' ? 'none' : 'auto',
-              }}
-            >
-              Convert Single Video
-            </a>
-            <a
-              role="tab"
-              className={`tab ${activeTab === 'folder' ? 'tab-active' : ''} ${disableTabs && activeTab !== 'folder' ? 'tab-disabled' : ''
-                }`}
-              onClick={() => !disableTabs && setActiveTab('folder')}
-              style={{
-                pointerEvents: disableTabs && activeTab !== 'folder' ? 'none' : 'auto',
-              }}
-            >
-              Convert All Videos from Folder
-            </a>
-          </div>
-
-          {/* Tab Content */}
-          <div className="mt-4">
-            {activeTab === 'single' ? (
-              <SingleVideoConversion disabled={disableTabs} />
-            ) : (
-              <FolderVideoConversion disabled={disableTabs} />
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default Task;
-
-
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/modules/Task/TaskWrapper.js":
-// import React from 'react';
-import { SettingsProvider } from '../../contexts/SingleTaskSettingsContext';
-import Task from './Task';
-
-const TaskWrapper = ({ taskId }) => {
-  if (!taskId) {
-    return <p className="text-gray-500">No task selected.</p>;
-  }
-
-  return (
-    <SettingsProvider taskId={taskId}>
-      <Task />
-    </SettingsProvider>
-  );
-};
-
-export default TaskWrapper;
-
-
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/modules/TasksQueue/SortableItem.js":
-// // src/modules/TasksQueue/SortableItem.js
-import {
-  useSortable,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-
-// Component for individual video items
-const SortableItem = ({ video, disabled }) => {
-    const {
-      attributes,
-      listeners,
-      setNodeRef,
-      transform,
-      transition,
-      isDragging,
-    } = useSortable({ id: video.id, disabled });
-  
-    const style = {
-      transform: CSS.Transform.toString(transform),
-      transition,
-      opacity: disabled && !isDragging ? 0.5 : 1,
-    };
-  
-    return (
-      <li
-        ref={setNodeRef}
-        style={style}
-        {...attributes}
-        {...listeners}
-        // className={`bg-base-100 p-4 shadow rounded-lg flex items-center justify-between ${
-        //   disabled ? 'pointer-events-none' : ''
-        // }`}
-        className={`bg-base-100 p-4 shadow rounded-lg flex items-center justify-between ${
-          disabled ? 'pointer-events-none' : ''
-        } hover:bg-base-200`}
-      >
-        <div>
-          <p className="font-medium">{video.name}</p>
-          <p
-            className={`badge ${
-              video.status === 'converting'
-                ? 'badge-accent'
-                : video.status === 'converted'
-                ? 'badge-success'
-                : 'badge-primary'
-            }`}
-          >
-            {video.status}
-          </p>
-        </div>
-        <button
-          className="btn btn-sm btn-error"
-          onClick={() => {
-            document.dispatchEvent(
-              new CustomEvent('delete-video', { detail: video.id })
-            );
-          }}
-          disabled={disabled}
-        >
-          Delete
-        </button>
-      </li>
-    );
-  };
-
-  export default SortableItem;
-
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/modules/TasksQueue/TasksQueue.js":
-// import React, { useContext, useState, useEffect } from 'react';
-import { TasksQueueContext } from '../../contexts/TasksQueueContext';
-import TaskWrapper from '../Task/TaskWrapper';
-import { v4 as uuidv4 } from 'uuid';
-
-const TasksQueue = () => {
-  const { tasks, addOrUpdateTask, removeTask } = useContext(TasksQueueContext);
-  const taskIds = Object.keys(tasks);
-  const [expandedTaskId, setExpandedTaskId] = useState(null); // Track expanded task
-  const [isProcessing, setIsProcessing] = useState(false); // Track processing state
-
-  const toggleAccordion = (taskId) => {
-    setExpandedTaskId((prev) => (prev === taskId ? null : taskId)); // Toggle expanded task
-  };
-
-  const handleAddTask = () => {
-    const newTaskId = uuidv4();
-
-    const newTask = {
-      id: newTaskId,
-      taskEventNames: {
-        eventNameSingleConversion: `conversion-progress-${newTaskId}`,
-        eventNameFolderConversion: `conversion-progress-folder-${newTaskId}`,
-      },
-      activeTab: 'single',
-      generalSettings: {
-        cpuSelection: 0,
-        priorityLevel: 'normal',
-      },
-      singleSettings: {
-        progress: {},
-        selectedFile: null,
-        outputFolder: null,
-        outputText: null,
-        converting: false,
-      },
-      folderSettings: {
-        progress: {},
-        selectedFolder: null,
-        outputFolder: null,
-        outputTextArray: null,
-        converting: false,
-      },
-      status: 'queued',
-    };
-
-    addOrUpdateTask(newTask); // Add the new task to the queue
-    setExpandedTaskId(newTaskId); // Automatically expand the new task
-  };
-
-  const processTask = async (taskId) => {
-    const task = tasks[taskId];
-    if (!task || task.status !== 'confirmed') return;
-
-    addOrUpdateTask({ ...task, status: 'in-progress' }); // Mark task as in-progress
-
-    try {
-      let result = null;
-      if (task.activeTab === 'folder') {
-        result = await window.electronAPI.generateHlsFolder(
-          task.folderSettings.selectedFolder,
-          task.folderSettings.outputFolder,
-          task.generalSettings.cpuSelection.toString() || '0',
-          task.generalSettings.priorityLevel || 'normal',
-          task.taskEventNames.eventNameFolderConversion
-        );
-      } else {
-        result = await window.electronAPI.generateHls(
-          task.singleSettings.selectedFile,
-          task.singleSettings.outputFolder,
-          task.generalSettings.cpuSelection.toString() || '0',
-          task.generalSettings.priorityLevel || 'normal',
-          task.taskEventNames.eventNameSingleConversion
-        );
-      }
-      addOrUpdateTask({
-        ...task,
-        outputText: result,
-        status: 'completed',
-        folderSettings: {
-          ...(task?.folderSettings ?? {}),
-          outputTextArray: result
-        },
-      }); // Mark task as completed
-    } catch (error) {
-      addOrUpdateTask({
-        ...task,
-        status: 'error',
-        errorMessage: error.message,
-      });
-    }
-  };
-
-  const handleStartConversion = () => {
-    setIsProcessing(true);
-  };
-
-  useEffect(() => {
-    const processQueue = async () => {
-      if (!isProcessing) return; // Only proceed if processing has been started
-
-      const inProgressTask = taskIds.find((id) => tasks[id]?.status === 'in-progress');
-      const nextTaskId = taskIds.find((id) => tasks[id]?.status === 'confirmed');
-
-      if (!inProgressTask && nextTaskId) {
-        await processTask(nextTaskId); // Process the next confirmed task
-      } else if (!inProgressTask && !nextTaskId) {
-        setIsProcessing(false); // Stop processing if no tasks remain
-      }
-    };
-
-    processQueue();
-  }, [tasks, isProcessing, taskIds]);
-
-  return (
-    <div className=" w-full mx-auto p-2  rounded-lg"> {/* container bg-base-100 */}
-      <h2 className="text-xl font-semibold mb-4">Tasks Queue</h2>
-      <div className="flex justify-between mb-4">
-        <button className="btn btn-primary" onClick={handleAddTask}>
-          Add Task
-        </button>
-        <button
-          className="btn btn-success"
-          onClick={handleStartConversion}
-          disabled={
-            isProcessing || !taskIds.some((id) => tasks[id]?.status === 'confirmed')
-          }
-        >
-          {isProcessing ? 'Processing...' : 'Start Conversion'}
-        </button>
-      </div>
-      <ul className="space-y-4">
-        {taskIds.length === 0 && (
-          <p className="text-gray-500">No tasks in the queue.</p>
-        )}
-        {taskIds.map((taskId) => (
-          <li key={taskId} className="bg-base-100 rounded shadow">
-            {/* Task Header */}
-            <div
-              className="p-4 flex justify-between items-center cursor-pointer hover:bg-base-300 shadow-md"
-              onClick={() => toggleAccordion(taskId)}
-            >
-              <div>
-                <p className="font-medium">{`Task: ${taskId}`}</p>
-                <p
-                  className={`badge ${tasks[taskId]?.status === 'completed'
-                    ? 'badge-success'
-                    : tasks[taskId]?.status === 'in-progress'
-                      ? 'badge-warning'
-                      : tasks[taskId]?.status === 'confirmed'
-                        ? 'badge-info'
-                        : 'badge-error'
-                    }`}
-                >
-                  {tasks[taskId]?.status || 'pending'}
-                </p>
-              </div>
-              <button
-                className="btn btn-sm btn-error"
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevent accordion toggle when clicking remove
-                  removeTask(taskId);
-                }}
-              >
-                Remove
-              </button>
-            </div>
-
-            {/* Task Content (Always Mounted, Visibility Controlled) */}
-            <div
-              className={`transition-all duration-300 ${expandedTaskId === taskId ? 'block' : 'hidden'
-                }`}
-            >
-              <div className="px-2 "> {/* bg-base-100 */}
-                <TaskWrapper taskId={taskId} />
-              </div>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-};
-
-export default TasksQueue;
-
-
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/reportWebVitals.js":
-// const reportWebVitals = onPerfEntry => {
+<!-- "d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/reportWebVitals.js": -->
+const reportWebVitals = onPerfEntry => {
   if (onPerfEntry && onPerfEntry instanceof Function) {
     import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
       getCLS(onPerfEntry);
@@ -1977,11 +1378,54 @@ export default TasksQueue;
 export default reportWebVitals;
 
 
-"d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/setupTests.js":
-// // jest-dom adds custom jest matchers for asserting on DOM nodes.
+<!-- "d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/src/setupTests.js": -->
+// jest-dom adds custom jest matchers for asserting on DOM nodes.
 // allows you to do things like:
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
+
+
+<!-- "d:/_STORAGE FOR WIN 10/MalonNoporSite/videoCa2/video-converter-app/tailwind.config.js": -->
+// tailwind.config.js
+module.exports = {
+  content: [
+    "./src/**/*.{js,jsx,ts,tsx}", // Include your React components
+  ],
+  theme: {
+    extend: {
+      // fontSize: {
+      //   sm: '0.8rem', // Customize the size as needed
+      // },
+    },
+  },
+  plugins: [
+    require('daisyui'), // Add DaisyUI as a plugin
+  ],
+  daisyui: {
+    themes: [
+      {
+        light: {
+          ...require("daisyui/src/theming/themes")["light"],
+          "accent": "#92efb6", // Customize accent color
+          // "accent-content": "#e9f2ed", // Accent content color
+
+          "primary": "#e2e8f0", // slate-200 for primary buttons (light theme)
+          "primary-content": "#1e293b", // slate-700 for text on primary buttons
+        },
+      },
+      {
+        dark: {
+          ...require("daisyui/src/theming/themes")["dark"],
+          "accent-content": "#e9f2ed", // Accent content color
+          "accent": "#169647", // Customize accent color
+
+          "primary": "#334155", // slate-700 for primary buttons (dark theme)
+          "primary-content": "#f1f5f9", // slate-200 for text on primary buttons
+        },
+      },
+    ],
+  },
+}
 
 
